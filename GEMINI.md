@@ -13,7 +13,7 @@ This project is an **Innovation Management and Hackathon Platform** designed to 
 
 ## Directory Structure
 - `backend/`: Django application.
-  - `apps/`: Domain-specific Django apps (e.g., `users`).
+  - `apps/`: Domain-specific Django apps (e.g., `users`, `hackathons`, `teams`).
   - `core/`: Project configuration (settings, URLs).
 - `frontend/`: Vite + React application.
   - `src/features/`: Domain-based logic and components.
@@ -21,6 +21,33 @@ This project is an **Innovation Management and Hackathon Platform** designed to 
 - `docs/`: Project documentation.
   - `sprints/`: Sprint-by-sprint progress and decisions.
 - `instructions/`: Initial project mandates and instructions.
+
+---
+
+## Architecture & Design Decisions
+
+### Backend Service Layer
+To maintain clean views and ensure transactional integrity, business logic is encapsulated in `services.py` within each app. All domain actions (e.g., creating teams, joining hackathons) must pass through these services.
+
+### RBAC & Security
+- **Roles:** ADMIN, PARTICIPANT, JUDGE.
+- **Permissions:** Custom `IsAdminOrReadOnly` for hackathons.
+- **Validations:** Business rules like registration deadlines and unique team membership per hackathon are enforced at the service level.
+
+### Frontend Standards
+- **TypeScript:** Strict typing is enforced. Use `import type` for interfaces to comply with `verbatimModuleSyntax`.
+- **State Management:** Use `AuthContext` for user session and `services/` for API abstractions.
+- **UI Patterns:** 
+  - **Auth Screens:** Modern dual-pane layout (Form + Visual Hero).
+  - **Main App:** Sidebar-based navigation for all authenticated routes.
+  - **Components:** Modular structure with dedicated components for Sidebar, Cards, and Inputs using Tailwind CSS custom classes (`btn-primary`, `card`, etc.).
+
+---
+
+## Roadmap Status
+- **Sprint 1 (Foundation):** Completed. Auth (JWT), CustomUser, and basic UI.
+- **Sprint 2 (Domain Core):** Completed. Hackathons, Teams, RBAC, and Service Layer.
+- **Sprint 3 (Submissions):** Next. Focus on project uploads and deadline validation.
 
 ---
 
