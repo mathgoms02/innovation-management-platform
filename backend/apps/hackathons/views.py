@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from .models import Hackathon
+from .serializers import HackathonSerializer
+from .permissions import IsAdminOrReadOnly
 
-# Create your views here.
+class HackathonViewSet(viewsets.ModelViewSet):
+    queryset = Hackathon.objects.all()
+    serializer_class = HackathonSerializer
+    permission_classes = [IsAdminOrReadOnly]
