@@ -16,7 +16,7 @@ const Login: React.FC = () => {
       const response = await api.post('/users/login/', { username, password });
       login(response.data);
       navigate('/');
-    } catch (err: any) {
+    } catch {
       setError('Credenciais inválidas. Tente novamente.');
     }
   };

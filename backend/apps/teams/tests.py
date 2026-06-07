@@ -18,7 +18,8 @@ class TeamTests(APITestCase):
             description='Desc',
             start_date=timezone.now() + timedelta(days=1),
             end_date=timezone.now() + timedelta(days=2),
-            registration_deadline=timezone.now() + timedelta(hours=12)
+            registration_deadline=timezone.now() + timedelta(hours=12),
+            status='PUBLISHED'
         )
 
     def test_create_team(self):
@@ -49,5 +50,15 @@ class TeamTests(APITestCase):
         self.client.force_authenticate(user=self.user1)
         url = reverse('team-list')
         data = {'name': 'Team 2', 'hackathon': self.hackathon.id}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+    def test_prevent_creation_after_deadline(self):
+        self.hackathon.registration_deadline = timezone.now() - timedelta(hours=1)
+        self.hackathon.save()
+        
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('team-list')
+        data = {'name': 'Team Late', 'hackathon': self.hackathon.id}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

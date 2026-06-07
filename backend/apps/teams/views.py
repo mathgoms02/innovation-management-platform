@@ -1,8 +1,10 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Team, TeamMember
+from rest_framework.exceptions import ValidationError
+from .models import Team
 from .serializers import TeamSerializer
+from .services import TeamService
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
@@ -20,12 +22,8 @@ class TeamViewSet(viewsets.ModelViewSet):
         team = self.get_object()
         user = request.user
 
-        # Check if user is already in a team for this hackathon
-        if Team.objects.filter(hackathon=team.hackathon, members=user).exists():
-            return Response(
-                {"detail": "Você já faz parte de uma equipe neste hackathon."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        TeamMember.objects.create(team=team, user=user)
-        return Response({"detail": "Você entrou na equipe com sucesso."}, status=status.HTTP_201_CREATED)
+        try:
+            TeamService.join_team(team, user)
+            return Response({"detail": "Você entrou na equipe com sucesso."}, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response({"detail": e.detail}, status=status.HTTP_400_BAD_REQUEST)

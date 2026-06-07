@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Team, TeamMember
 from django.contrib.auth import get_user_model
+from .services import TeamService
 
 User = get_user_model()
 
@@ -20,19 +21,10 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'hackathon', 'leader', 'leader_username', 'members_count', 'created_at')
         read_only_fields = ('id', 'leader', 'created_at')
 
-    def validate(self, data):
-        user = self.context['request'].user
-        hackathon = data['hackathon']
-        
-        # Check if user is already in a team for this hackathon
-        if Team.objects.filter(hackathon=hackathon, members=user).exists():
-            raise serializers.ValidationError("Você já faz parte de uma equipe neste hackathon.")
-            
-        return data
-
     def create(self, validated_data):
         user = self.context['request'].user
-        validated_data['leader'] = user
-        team = super().create(validated_data)
-        TeamMember.objects.create(team=team, user=user)
-        return team
+        return TeamService.create_team(
+            hackathon=validated_data['hackathon'],
+            name=validated_data['name'],
+            leader=user
+        )
