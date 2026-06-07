@@ -37,6 +37,10 @@ To maintain clean views and ensure transactional integrity, business logic is en
 ### Frontend Standards
 - **TypeScript:** Strict typing is enforced. Use `import type` for interfaces to comply with `verbatimModuleSyntax`.
 - **State Management:** Use `AuthContext` for user session and `services/` for API abstractions.
+- **UI Patterns:** 
+  - **Auth Screens:** Modern dual-pane layout (Form + Visual Hero).
+  - **Main App:** Sidebar-based navigation for all authenticated routes.
+  - **Components:** Modular structure with dedicated components for Sidebar, Cards, and Inputs using Tailwind CSS custom classes (`btn-primary`, `card`, etc.).
 
 ---
 

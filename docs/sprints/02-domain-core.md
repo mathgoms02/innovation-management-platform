@@ -9,6 +9,7 @@ Implementar a gestão de Hackathons e o fluxo de formação de equipes.
 - [x] Modelagem de Equipes (Teams)
 - [x] Fluxo de Inscrição em Hackathons
 - [x] Listagem de Hackathons no Frontend
+- [x] Reformulação Completa de UI (Design Moderno/Cyberpunk)
 
 ## Decisões Arquiteturais
 1.  **RBAC (Role-Based Access Control):** Garantir que apenas usuários com `role=ADMIN` possam criar e editar Hackathons.
