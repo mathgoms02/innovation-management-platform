@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getHackathons, Hackathon } from '../services/hackathon';
+import { getHackathons } from '../services/hackathon';
+import type { Hackathon } from '../services/hackathon';
 import { Link } from 'react-router-dom';
 
 const Hackathons: React.FC = () => {
