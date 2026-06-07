@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Hackathons from './pages/Hackathons';
 import './App.css';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -25,6 +26,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/hackathons"
+            element={
+              <PrivateRoute>
+                <Hackathons />
               </PrivateRoute>
             }
           />
