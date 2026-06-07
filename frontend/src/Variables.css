@@ -1,0 +1,20 @@
+:root {
+  /* Primary Colors */
+  --color-bg: #0b0c10;
+  --color-bg-secondary: #1d202b;
+
+  --color-primary: #00f0ff;
+  --color-secondary: #ff007a;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Text */
+  --text-main: var(--color-primary);
+  --text-light: rgba(255, 255, 255, 0.75);
+
+  /* UI */
+  --border-radius: 10px;
+  --transition-fast: 0.2s ease-in-out;
+  --transition-medium: 0.5s ease-in-out;
+}

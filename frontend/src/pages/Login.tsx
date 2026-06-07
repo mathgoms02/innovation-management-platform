@@ -22,42 +22,44 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Usuário</label>
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
+      <div className="card w-96">
+        <h2 className="text-3xl font-bold mb-8 text-center">Acessar Conta</h2>
+        {error && <p className="text-[var(--color-secondary)] text-sm mb-4 text-center">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-[var(--text-light)] text-sm font-medium mb-2">Usuário</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              className="input-field"
+              placeholder="Digite seu usuário"
               required
             />
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Senha</label>
+          <div>
+            <label className="block text-[var(--text-light)] text-sm font-medium mb-2">Senha</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              className="input-field"
+              placeholder="••••••••"
               required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+            className="btn-primary w-full"
           >
-            Entrar
+            ENTRAR
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Não tem uma conta?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Registre-se
+        <p className="mt-8 text-center text-sm text-[var(--text-light)]">
+          Novo por aqui?{' '}
+          <Link to="/register" className="text-[var(--color-primary)] hover:underline font-semibold">
+            Crie sua conta
           </Link>
         </p>
       </div>
