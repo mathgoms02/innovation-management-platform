@@ -19,5 +19,6 @@ Configurar a base técnica do projeto (Backend e Frontend) e implementar o siste
 - [x] Inicialização do Projeto Django e App 'users'
 - [x] Configuração do CustomUser
 - [x] Setup do Projeto React com Vite e Tailwind
-- [ ] Implementação de Endpoints de Auth (Login/Register/Refresh)
+- [x] Implementação de Endpoints de Auth (Login/Register/Refresh)
 - [x] Configuração do Axios Interceptor no Frontend
+- [x] Criação das Telas de Auth no Frontend (Login/Register)
