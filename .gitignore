@@ -1,0 +1,13 @@
+# Env Vars
+.env
+
+# Backend
+venv
+db.sqlite3
+__pycache__/
+
+# Frontend
+node_modules
+
+# AI
+instructions/
