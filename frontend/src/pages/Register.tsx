@@ -17,7 +17,7 @@ const Register: React.FC = () => {
     try {
       await api.post('/users/register/', formData);
       navigate('/login');
-    } catch (err: any) {
+    } catch {
       setError('Erro ao registrar. Verifique os dados e tente novamente.');
     }
   };

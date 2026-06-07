@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../features/auth/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -9,12 +10,20 @@ const Dashboard: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            onClick={logout}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-          >
-            Sair
-          </button>
+          <div className="space-x-4">
+            <Link
+              to="/hackathons"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              Ver Hackathons
+            </Link>
+            <button
+              onClick={logout}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+            >
+              Sair
+            </button>
+          </div>
         </header>
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Bem-vindo, {user?.username}!</h2>
