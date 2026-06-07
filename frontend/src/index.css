@@ -28,7 +28,7 @@
 
   .card {
     @apply bg-[var(--color-bg-secondary)] border border-white/10 p-6 rounded-[var(--border-radius)] 
-           hover:border-[var(--color-primary)]/50 transition-[var(--transition-medium)];
+           hover:border-[var(--color-primary)] transition-[var(--transition-medium)];
   }
 
   .input-field {
