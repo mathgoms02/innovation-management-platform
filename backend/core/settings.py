@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # Local apps
     'apps.users',
     'apps.hackathons',
+    'apps.teams',
 ]
 
 MIDDLEWARE = [
