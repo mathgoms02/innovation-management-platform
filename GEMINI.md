@@ -47,7 +47,8 @@ To maintain clean views and ensure transactional integrity, business logic is en
 ## Roadmap Status
 - **Sprint 1 (Foundation):** Completed. Auth (JWT), CustomUser, and basic UI.
 - **Sprint 2 (Domain Core):** Completed. Hackathons, Teams, RBAC, and Service Layer.
-- **Sprint 3 (Submissions):** Next. Focus on project uploads and deadline validation.
+- **Sprint 3 (Submissions):** Completed. Project uploads and deadline validation.
+- **Sprint 4 (Evaluation):** Next. Focus on judge scoring and ranking logic.
 
 ---
 
