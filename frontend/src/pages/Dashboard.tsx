@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
           <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" active />
           <SidebarItem icon={Trophy} label="Hackathons" to="/hackathons" />
           <SidebarItem icon={Users} label="Equipes" to="#" />
-          <SidebarItem icon={FileText} label="Submissões" to="#" />
+          <SidebarItem icon={FileText} label="Submissões" to="/submissions" />
           <div className="mt-8 mb-2 px-6 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Preferences</div>
           <SidebarItem icon={Settings} label="Settings" to="#" />
         </nav>

@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Hackathons from './pages/Hackathons';
+import Submissions from './pages/Submissions';
 import './App.css';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -34,6 +35,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Hackathons />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/submissions"
+            element={
+              <PrivateRoute>
+                <Submissions />
               </PrivateRoute>
             }
           />
