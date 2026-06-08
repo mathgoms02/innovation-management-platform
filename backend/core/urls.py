@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/users/', include('apps.users.urls')),
     path('api/hackathons/', include('apps.hackathons.urls')),
     path('api/teams/', include('apps.teams.urls')),
+    path('api/submissions/', include('apps.submissions.urls')),
 ]
