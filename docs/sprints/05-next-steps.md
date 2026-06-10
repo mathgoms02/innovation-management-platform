@@ -18,13 +18,16 @@ Implementamos o sistema de avaliação completo e reforçamos a segurança/priva
 
 ---
 
-## Próximos Passos: Sprint 5 (Performance & Polish)
+## Resumo da Sprint 5 (Concluída)
+Focamos em otimização e melhoria de UX, marcando a conclusão técnica do sistema.
 
-### Objetivos Principais
-- **Otimização de Queries:** Resolver problemas de N+1 no ranking e listagem de hackathons usando `select_related` e `prefetch_related`.
-- **UX Avançada:** Implementar Skeletons para estados de carregamento e transições de página suaves.
-- **Anonimização (LGPD):** Refinar o processo de deleção para garantir que logs não contenham PII (Personally Identifiable Information).
-- **Refatoração de Estilos:** Extrair padrões repetitivos do Tailwind para classes customizadas no `App.css`.
+### Backend
+1. **Otimização de Banco de Dados:** Resolução de múltiplas N+1 queries utilizando `select_related` e `prefetch_related` em Views e Services.
+2. **LGPD - Anonimização:** Refinamento do processo de deleção de conta (`UserDetailView`), garantindo a anonimização de PII ao invés de deleção em cascata.
+
+### Frontend
+1. **Skeletons:** Implementação do componente `Skeleton` para estados de carregamento em `Hackathons.tsx`.
+2. **CSS Refactoring:** Limpeza de boilerplate no `App.css` e consolidação de classes Tailwind em `index.css`.
 
 ### Regras Estabelecidas
 1. **Atomicidade:** Manter a regra de 1 commit por task/mudança lógica.
