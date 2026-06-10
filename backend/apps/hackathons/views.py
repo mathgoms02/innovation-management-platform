@@ -4,6 +4,6 @@ from .serializers import HackathonSerializer
 from .permissions import IsAdminOrReadOnly
 
 class HackathonViewSet(viewsets.ModelViewSet):
-    queryset = Hackathon.objects.all()
+    queryset = Hackathon.objects.prefetch_related('judges')
     serializer_class = HackathonSerializer
     permission_classes = [IsAdminOrReadOnly]

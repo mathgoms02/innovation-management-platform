@@ -64,18 +64,35 @@ class EvaluationService:
         Inclui todas as equipes inscritas, mesmo as sem submissão.
         """
         from apps.teams.models import Team
+        from django.db.models import Count
         
-        teams = Team.objects.filter(hackathon=hackathon)
+        teams = Team.objects.filter(hackathon=hackathon).select_related('submission')
         ranking = []
         
-        criteria = Criterion.objects.filter(hackathon=hackathon)
+        criteria = list(Criterion.objects.filter(hackathon=hackathon))
         total_weight = sum(c.weight for c in criteria)
         
         if total_weight == 0:
             total_weight = 1
 
+        # Mapeia contagem de avaliações por submissão
+        evals_query = Evaluation.objects.filter(submission__team__hackathon=hackathon)
+        evals_counts = {item['submission_id']: item['count'] for item in evals_query.values('submission_id').annotate(count=Count('id'))}
+
+        # Mapeia as médias por critério e submissão num único dicionário (sub_id -> {crit_id: avg_value})
+        avg_scores_query = Score.objects.filter(evaluation__submission__team__hackathon=hackathon)\
+            .values('evaluation__submission_id', 'criterion_id')\
+            .annotate(avg=Avg('value'))
+        
+        avg_scores_map = {}
+        for row in avg_scores_query:
+            sub_id = row['evaluation__submission_id']
+            crit_id = row['criterion_id']
+            if sub_id not in avg_scores_map:
+                avg_scores_map[sub_id] = {}
+            avg_scores_map[sub_id][crit_id] = row['avg']
+
         for team in teams:
-            # Check for submission via related_name or field
             submission = getattr(team, 'submission', None)
             
             if not submission:
@@ -88,8 +105,7 @@ class EvaluationService:
                 })
                 continue
 
-            evaluations = Evaluation.objects.filter(submission=submission)
-            evaluations_count = evaluations.count()
+            evaluations_count = evals_counts.get(submission.id, 0)
             
             if evaluations_count == 0:
                 ranking.append({
@@ -104,12 +120,8 @@ class EvaluationService:
             total_weighted_score = 0
             
             for criterion in criteria:
-                avg_value = Score.objects.filter(
-                    evaluation__submission=submission,
-                    criterion=criterion
-                ).aggregate(avg=Avg('value'))['avg'] or 0
-                
-                total_weighted_score += avg_value * criterion.weight
+                avg_value = avg_scores_map.get(submission.id, {}).get(criterion.id, 0.0)
+                total_weighted_score += float(avg_value) * float(criterion.weight)
                 
             final_score = total_weighted_score / total_weight if total_weight > 0 else total_weighted_score
             

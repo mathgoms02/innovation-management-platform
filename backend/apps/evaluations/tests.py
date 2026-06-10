@@ -25,6 +25,7 @@ class EvaluationTests(APITestCase):
             registration_deadline=timezone.now() - timedelta(hours=1),
             status='ONGOING'
         )
+        self.hackathon.judges.add(self.judge)
         
         self.criterion1 = Criterion.objects.create(hackathon=self.hackathon, name='Innovation', weight=0.6)
         self.criterion2 = Criterion.objects.create(hackathon=self.hackathon, name='Tech', weight=0.4)
