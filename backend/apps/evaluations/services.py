@@ -18,7 +18,7 @@ class EvaluationService:
             
         hackathon = submission.team.hackathon
         
-        # 2. Validar o status do hackathon (opcional: restringir a estados específicos)
+        # 2. Validar o status do hackathon
         if hackathon.status not in ['ONGOING', 'COMPLETED']:
             raise ValidationError("Este hackathon não está em uma fase que permite avaliação.")
             
@@ -30,17 +30,18 @@ class EvaluationService:
         )
         
         # 4. Processar as notas por critério
+        all_hackathon_criteria = Criterion.objects.filter(hackathon=hackathon)
         provided_criterion_ids = [item.get('criterion_id') for item in scores_data]
         
-        # Verificar se todos os critérios pertencem ao hackathon
-        criteria_count = Criterion.objects.filter(
-            id__in=provided_criterion_ids, 
-            hackathon=hackathon
-        ).count()
-        
-        if criteria_count != len(provided_criterion_ids):
+        # Verificar se todos os critérios fornecidos pertencem ao hackathon
+        if all_hackathon_criteria.filter(id__in=provided_criterion_ids).count() != len(provided_criterion_ids):
             raise ValidationError("Um ou mais critérios fornecidos são inválidos para este hackathon.")
             
+        # BUG FIX: Verificar se TODOS os critérios do hackathon foram pontuados
+        if all_hackathon_criteria.count() != len(provided_criterion_ids):
+            missing_criteria = all_hackathon_criteria.exclude(id__in=provided_criterion_ids).values_list('name', flat=True)
+            raise ValidationError(f"Todos os critérios devem ser avaliados. Faltando: {', '.join(missing_criteria)}")
+
         for item in scores_data:
             criterion_id = item.get('criterion_id')
             value = item.get('value')
@@ -60,35 +61,49 @@ class EvaluationService:
     def get_ranking(hackathon):
         """
         Calcula o ranking das equipes baseado na média ponderada das avaliações dos jurados.
+        Inclui todas as equipes inscritas, mesmo as sem submissão.
         """
-        from apps.submissions.models import Submission
+        from apps.teams.models import Team
         
-        submissions = Submission.objects.filter(team__hackathon=hackathon)
+        teams = Team.objects.filter(hackathon=hackathon)
         ranking = []
         
         criteria = Criterion.objects.filter(hackathon=hackathon)
         total_weight = sum(c.weight for c in criteria)
         
         if total_weight == 0:
-            total_weight = 1 # Evitar divisão por zero se não houver critérios (não deveria acontecer)
+            total_weight = 1
 
-        for submission in submissions:
+        for team in teams:
+            # Check for submission via related_name or field
+            submission = getattr(team, 'submission', None)
+            
+            if not submission:
+                ranking.append({
+                    'team_id': team.id,
+                    'team_name': team.name,
+                    'final_score': 0.0,
+                    'evaluations_count': 0,
+                    'status': 'NO_SUBMISSION'
+                })
+                continue
+
             evaluations = Evaluation.objects.filter(submission=submission)
             evaluations_count = evaluations.count()
             
             if evaluations_count == 0:
                 ranking.append({
-                    'team_id': submission.team.id,
-                    'team_name': submission.team.name,
+                    'team_id': team.id,
+                    'team_name': team.name,
                     'final_score': 0.0,
-                    'evaluations_count': 0
+                    'evaluations_count': 0,
+                    'status': 'NOT_EVALUATED'
                 })
                 continue
                 
             total_weighted_score = 0
             
             for criterion in criteria:
-                # Média das notas de todos os jurados para este critério nesta submissão
                 avg_value = Score.objects.filter(
                     evaluation__submission=submission,
                     criterion=criterion
@@ -96,16 +111,15 @@ class EvaluationService:
                 
                 total_weighted_score += avg_value * criterion.weight
                 
-            # Pontuação final normalizada pelo peso total (se for percentual, total_weight deve ser 1 ou 100)
             final_score = total_weighted_score / total_weight if total_weight > 0 else total_weighted_score
             
             ranking.append({
-                'team_id': submission.team.id,
-                'team_name': submission.team.name,
+                'team_id': team.id,
+                'team_name': team.name,
                 'final_score': round(final_score, 2),
-                'evaluations_count': evaluations_count
+                'evaluations_count': evaluations_count,
+                'status': 'EVALUATED'
             })
             
-        # Ordenar por score decrescente
         ranking.sort(key=lambda x: x['final_score'], reverse=True)
         return ranking

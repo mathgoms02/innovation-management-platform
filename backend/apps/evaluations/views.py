@@ -37,6 +37,14 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         
         try:
             submission = Submission.objects.get(id=serializer.validated_data['submission_id'])
+            
+            # Verificação de segurança: O jurado está designado para este hackathon?
+            if not submission.team.hackathon.judges.filter(id=request.user.id).exists():
+                return Response(
+                    {"detail": "Você não está designado como jurado para este hackathon."}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             evaluation = EvaluationService.create_evaluation(
                 judge=request.user,
                 submission=submission,
