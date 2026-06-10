@@ -23,7 +23,7 @@ class CriterionViewSet(viewsets.ModelViewSet):
         return self.queryset
 
 class EvaluationViewSet(viewsets.ModelViewSet):
-    queryset = Evaluation.objects.all()
+    queryset = Evaluation.objects.select_related('judge', 'submission__team').prefetch_related('scores__criterion')
     serializer_class = EvaluationSerializer
     
     def get_permissions(self):

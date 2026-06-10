@@ -19,5 +19,16 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
-        user.delete()
+        # LGPD Anonymization
+        user.username = f"deleted_{user.id}"
+        user.email = f"deleted_{user.id}@anonymized.local"
+        user.first_name = "Anônimo"
+        user.last_name = ""
+        user.bio = ""
+        user.is_active = False
+        user.has_accepted_terms = False
+        user.set_unusable_password()
+        if user.avatar:
+            user.avatar.delete(save=False)
+        user.save()
         return Response(status=204)

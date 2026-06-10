@@ -6,7 +6,7 @@ from .services import SubmissionService
 from apps.teams.models import Team
 
 class SubmissionViewSet(viewsets.ModelViewSet):
-    queryset = Submission.objects.all()
+    queryset = Submission.objects.select_related('team__hackathon')
     serializer_class = SubmissionSerializer
     permission_classes = [permissions.IsAuthenticated]
 

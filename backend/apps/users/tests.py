@@ -13,7 +13,8 @@ class AuthTests(APITestCase):
             'username': 'testuser',
             'password': 'testpassword123',
             'email': 'test@example.com',
-            'role': 'PARTICIPANT'
+            'role': 'PARTICIPANT',
+            'has_accepted_terms': True
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

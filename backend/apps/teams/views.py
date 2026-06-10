@@ -7,7 +7,7 @@ from .serializers import TeamSerializer
 from .services import TeamService
 
 class TeamViewSet(viewsets.ModelViewSet):
-    queryset = Team.objects.all()
+    queryset = Team.objects.select_related('leader').prefetch_related('members')
     serializer_class = TeamSerializer
     permission_classes = [permissions.IsAuthenticated]
 
