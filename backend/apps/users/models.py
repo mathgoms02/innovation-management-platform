@@ -14,6 +14,7 @@ class User(AbstractUser):
     )
     bio = models.TextField(blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    has_accepted_terms = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

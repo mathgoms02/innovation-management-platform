@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { getHackathons } from '../services/hackathon';
 import type { Hackathon } from '../services/hackathon';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext';
 
 const Hackathons: React.FC = () => {
+  const { user } = useAuth();
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,9 +62,27 @@ const Hackathons: React.FC = () => {
                 }`}>
                   {hackathon.status}
                 </span>
-                <button className="text-[var(--color-primary)] font-bold text-sm hover:underline">
-                  DETALHES →
-                </button>
+                <div className="flex gap-4">
+                  <Link 
+                    to={`/ranking/${hackathon.id}`}
+                    className="text-xs font-bold text-[var(--text-light)] hover:text-[var(--color-primary)] transition-colors uppercase tracking-widest"
+                  >
+                    Ranking
+                  </Link>
+                  {user?.role === 'JUDGE' && (
+                    <Link 
+                      to={`/judge/${hackathon.id}`}
+                      className="text-xs font-bold text-[var(--color-primary)] hover:underline uppercase tracking-widest"
+                    >
+                      Avaliar →
+                    </Link>
+                  )}
+                  {user?.role === 'ADMIN' && (
+                    <button className="text-[var(--color-primary)] font-bold text-sm hover:underline">
+                      DETALHES →
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

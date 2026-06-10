@@ -11,8 +11,17 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Users can see submissions from their own teams
-        return self.queryset.filter(team__members=self.request.user).distinct()
+        user = self.request.user
+        if not user.is_authenticated:
+            return self.queryset.none()
+            
+        if user.role in ['ADMIN', 'JUDGE']:
+            hackathon_id = self.request.query_params.get('hackathon_id')
+            if hackathon_id:
+                return self.queryset.filter(team__hackathon_id=hackathon_id)
+            return self.queryset
+            
+        return self.queryset.filter(team__members=user).distinct()
 
     def create(self, request, *args, **kwargs):
         team_id = request.data.get('team')

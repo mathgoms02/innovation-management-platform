@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
+import { useToast } from '../components/Toast';
 import api from '../services/api';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const { login } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -15,9 +16,10 @@ const Login: React.FC = () => {
     try {
       const response = await api.post('/users/login/', { username, password });
       login(response.data);
+      showToast('success', 'AUTENTICAÇÃO_BEM_SUCEDIDA // ACESSO_LIBERADO');
       navigate('/');
-    } catch {
-      setError('Credenciais inválidas. Tente novamente.');
+    } catch (err: any) {
+      showToast('error', err.response?.data?.detail || 'ERRO_DE_AUTENTICAÇÃO // CREDENCIAIS_INVÁLIDAS');
     }
   };
 
@@ -30,12 +32,6 @@ const Login: React.FC = () => {
             <h2 className="text-4xl font-black tracking-tighter mb-2 italic">WELCOME_BACK</h2>
             <p className="text-[var(--text-light)]">Identifique-se para acessar o sistema.</p>
           </div>
-          
-          {error && (
-            <div className="bg-[var(--color-secondary)]/10 border border-[var(--color-secondary)]/20 text-[var(--color-secondary)] p-3 rounded-lg text-sm mb-6 text-center">
-              {error}
-            </div>
-          )}
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
