@@ -4,6 +4,8 @@ import type { Hackathon } from '../services/hackathon';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 
+import { Skeleton } from '../components/Skeleton';
+
 const Hackathons: React.FC = () => {
   const { user } = useAuth();
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
@@ -23,7 +25,40 @@ const Hackathons: React.FC = () => {
     fetchHackathons();
   }, []);
 
-  if (loading) return <div className="p-8 text-center">Carregando eventos...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-bg)] p-8">
+        <div className="max-w-6xl mx-auto">
+          <header className="flex justify-between items-center mb-12">
+            <h1 className="text-4xl tracking-tight text-white">Hackathons</h1>
+            <Link to="/" className="text-[var(--color-primary)] hover:underline font-medium">
+              ← Voltar ao Dashboard
+            </Link>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="card group">
+                <Skeleton className="h-8 w-3/4 mb-3" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-5/6 mb-6" />
+                <div className="space-y-2 mb-8 border-l-2 border-white/20 pl-4">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <div className="flex gap-4">
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] p-8">
