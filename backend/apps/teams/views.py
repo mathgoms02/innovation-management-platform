@@ -12,10 +12,15 @@ class TeamViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        queryset = self.queryset
         hackathon_id = self.request.query_params.get('hackathon_id')
         if hackathon_id:
-            return self.queryset.filter(hackathon_id=hackathon_id)
-        return self.queryset
+            queryset = queryset.filter(hackathon_id=hackathon_id)
+        
+        if self.request.query_params.get('mine') == 'true':
+            queryset = queryset.filter(members=self.request.user)
+            
+        return queryset.distinct()
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):

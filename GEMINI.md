@@ -47,7 +47,8 @@ To maintain clean views and ensure transactional integrity, business logic is en
 ## Roadmap Status
 - **Sprint 1 (Foundation):** Completed. Auth (JWT), CustomUser, and basic UI.
 - **Sprint 2 (Domain Core):** Completed. Hackathons, Teams, RBAC, and Service Layer.
-- **Sprint 3 (Submissions):** Next. Focus on project uploads and deadline validation.
+- **Sprint 3 (Submissions):** Completed. Project uploads and deadline validation.
+- **Sprint 4 (Evaluation):** Next. Focus on judge scoring and ranking logic.
 
 ---
 
@@ -72,9 +73,11 @@ To maintain clean views and ensure transactional integrity, business logic is en
 ## Development Conventions
 
 ### Git Workflow
-- Use **Conventional Commits** (e.g., `feat:`, `fix:`, `docs:`, `refactor:`).
-- Always suggest a commit message before the user commits.
-- **DO NOT** commit or push without explicit user permission.
+- **Branching Strategy:** Use dedicated branches for each sprint (e.g., `sprint-01`, `sprint-02`).
+- **Conventional Commits:** Use standard prefixes (e.g., `feat:`, `fix:`, `docs:`, `refactor:`).
+- **Atomic Commits:** Commit by individual task or logical change. Avoid large, monolithic commits.
+- **Commit Only:** The agent must only perform `git commit`. **NEVER** perform `git push`.
+- **User Permission:** Always suggest a commit message and wait for explicit permission before committing.
 
 ### Backend (Django)
 - **Domain-Based Structure:** Keep business logic in `apps/`.
