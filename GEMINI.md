@@ -27,28 +27,28 @@ This project is an **Innovation Management and Hackathon Platform** designed to 
 ## Architecture & Design Decisions
 
 ### Backend Service Layer
-To maintain clean views and ensure transactional integrity, business logic is encapsulated in `services.py` within each app. All domain actions (e.g., creating teams, joining hackathons) must pass through these services.
+To maintain clean views and ensure transactional integrity, business logic is encapsulated in `services.py` within each app. All domain actions (e.g., creating teams, joining hackathons, submitting evaluations) must pass through these services.
 
-### RBAC & Security
-- **Roles:** ADMIN, PARTICIPANT, JUDGE.
-- **Permissions:** Custom `IsAdminOrReadOnly` for hackathons.
-- **Validations:** Business rules like registration deadlines and unique team membership per hackathon are enforced at the service level.
+### LGPD & Security
+- **Consent:** Mandatory `has_accepted_terms` check during registration.
+- **Account Deletion:** Users have the right to permanent deletion (Hard Delete) via the Dashboard.
+- **Judge-Event Binding:** Judges can only access and evaluate hackathons they are explicitly assigned to via the `judges` ManyToMany field.
 
 ### Frontend Standards
-- **TypeScript:** Strict typing is enforced. Use `import type` for interfaces to comply with `verbatimModuleSyntax`.
-- **State Management:** Use `AuthContext` for user session and `services/` for API abstractions.
 - **UI Patterns:** 
   - **Auth Screens:** Modern dual-pane layout (Form + Visual Hero).
   - **Main App:** Sidebar-based navigation for all authenticated routes.
+  - **Feedback:** Use `useToast` hook for all global notifications (Success/Error/Info).
   - **Components:** Modular structure with dedicated components for Sidebar, Cards, and Inputs using Tailwind CSS custom classes (`btn-primary`, `card`, etc.).
 
 ---
 
 ## Roadmap Status
-- **Sprint 1 (Foundation):** Completed. Auth (JWT), CustomUser, and basic UI.
-- **Sprint 2 (Domain Core):** Completed. Hackathons, Teams, RBAC, and Service Layer.
-- **Sprint 3 (Submissions):** Completed. Project uploads and deadline validation.
-- **Sprint 4 (Evaluation):** Next. Focus on judge scoring and ranking logic.
+- **Sprint 1 (Foundation):** Completed.
+- **Sprint 2 (Domain Core):** Completed.
+- **Sprint 3 (Submissions):** Completed.
+- **Sprint 4 (Evaluation & Security):** Completed. Scoring, Ranking, Judge RBAC, and LGPD.
+- **Sprint 5 (Performance & Polish):** Next. Focus on N+1 optimization, Skeletons, and final UX polish.
 
 ---
 
