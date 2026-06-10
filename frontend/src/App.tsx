@@ -5,6 +5,9 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Hackathons from './pages/Hackathons';
 import Submissions from './pages/Submissions';
+import Ranking from './pages/Ranking';
+import JudgeDashboard from './pages/JudgeDashboard';
+import EvaluateSubmission from './pages/EvaluateSubmission';
 import './App.css';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -43,6 +46,30 @@ function App() {
             element={
               <PrivateRoute>
                 <Submissions />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ranking/:hackathonId"
+            element={
+              <PrivateRoute>
+                <Ranking />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/judge/:hackathonId"
+            element={
+              <PrivateRoute>
+                <JudgeDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/evaluate/:submissionId"
+            element={
+              <PrivateRoute>
+                <EvaluateSubmission />
               </PrivateRoute>
             }
           />
