@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
-import { LayoutDashboard, Trophy, Users, FileText, Settings, LogOut, Bell, Search } from 'lucide-react';
+import api from '../services/api';
+import { LayoutDashboard, Trophy, Users, FileText, Settings, LogOut, Bell, Search, Trash2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface SidebarItemProps {
@@ -26,6 +27,20 @@ const SidebarItem = ({ icon: Icon, label, to, active = false }: SidebarItemProps
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('ALERTA CRÍTICO: Esta ação excluirá permanentemente todos os seus dados pessoais (LGPD). Deseja continuar?')) {
+      try {
+        await api.delete('/users/me/');
+        logout();
+        navigate('/login');
+      } catch (error) {
+        console.error('Erro ao excluir conta:', error);
+        alert('Falha ao processar requisição de exclusão.');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex overflow-hidden">
@@ -40,13 +55,21 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
         
-        <nav className="flex-1">
+        <nav className="flex-1 flex flex-col">
           <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" active />
           <SidebarItem icon={Trophy} label="Hackathons" to="/hackathons" />
           <SidebarItem icon={Users} label="Equipes" to="#" />
           <SidebarItem icon={FileText} label="Submissões" to="/submissions" />
           <div className="mt-8 mb-2 px-6 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Preferences</div>
           <SidebarItem icon={Settings} label="Settings" to="#" />
+          
+          <button 
+            onClick={handleDeleteAccount}
+            className="flex items-center gap-4 px-6 py-4 text-red-500/50 hover:text-red-500 hover:bg-red-500/5 transition-all group mt-auto mb-4"
+          >
+            <Trash2 size={20} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Delete_Account</span>
+          </button>
         </nav>
 
         <button 

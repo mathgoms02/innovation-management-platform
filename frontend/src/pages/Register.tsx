@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import api from '../services/api';
 
 const Register: React.FC = () => {
@@ -8,17 +9,23 @@ const Register: React.FC = () => {
     email: '',
     password: '',
     role: 'PARTICIPANT',
+    has_accepted_terms: false,
   });
-  const [error, setError] = useState('');
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.has_accepted_terms) {
+      showToast('info', 'LGPD_CONSENT_REQUIRED // ACEITE_OS_TERMOS');
+      return;
+    }
     try {
       await api.post('/users/register/', formData);
+      showToast('success', 'CADASTRO_FINALIZADO // BEM-VINDO_AO_CLUSTER');
       navigate('/login');
-    } catch {
-      setError('Erro ao registrar. Verifique os dados e tente novamente.');
+    } catch (err: any) {
+      showToast('error', err.response?.data?.detail || 'ERRO_DE_PROCESSAMENTO // VERIFIQUE_OS_DADOS');
     }
   };
 
@@ -48,12 +55,6 @@ const Register: React.FC = () => {
             <h2 className="text-4xl font-black tracking-tighter mb-2 italic">CREATE_ACCOUNT</h2>
             <p className="text-[var(--text-light)]">Preencha seus dados para começar.</p>
           </div>
-          
-          {error && (
-            <div className="bg-[var(--color-secondary)]/10 border border-[var(--color-secondary)]/20 text-[var(--color-secondary)] p-3 rounded-lg text-sm mb-6 text-center">
-              {error}
-            </div>
-          )}
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -102,7 +103,21 @@ const Register: React.FC = () => {
                 <option value="JUDGE">JURADO</option>
               </select>
             </div>
-            <button type="submit" className="btn-secondary w-full py-4 text-lg mt-4">
+
+            <div className="flex items-center gap-3 mt-4 mb-4">
+              <input 
+                type="checkbox" 
+                id="lgpd"
+                checked={formData.has_accepted_terms}
+                onChange={(e) => setFormData({ ...formData, has_accepted_terms: e.target.checked })}
+                className="w-4 h-4 rounded border-white/10 bg-white/5 text-[var(--color-secondary)] focus:ring-[var(--color-secondary)]"
+              />
+              <label htmlFor="lgpd" className="text-[10px] text-[var(--text-light)] uppercase tracking-widest leading-relaxed">
+                Eu aceito os <span className="text-white underline cursor-pointer">Termos de Uso</span> e a <span className="text-white underline cursor-pointer">Política de Privacidade</span> (LGPD).
+              </label>
+            </div>
+
+            <button type="submit" className="btn-secondary w-full py-4 text-lg">
               INITIALIZE_REGISTRATION
             </button>
           </form>
