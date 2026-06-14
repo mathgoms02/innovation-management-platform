@@ -5,10 +5,10 @@ Elevar o nível da plataforma de um MVP robusto para um sistema pronto para esca
 
 ## Tarefas Propostas
 
-### 1. Observabilidade & Auditoria (Backend)
-- **Logs Estruturados:** Implementar `django-structlog` para rastrear ações críticas (criação de hackathons, alterações de notas).
-- **Trilha de Auditoria:** Criar um modelo `AuditLog` para registrar quem alterou o quê e quando, especialmente para ações de Admin e Jurados.
-- **Health Checks:** Adicionar endpoints de `/health/` para monitoramento de infraestrutura.
+### 1. Observabilidade & Auditoria (Backend) [CONCLUÍDO]
+- [x] **Logs Estruturados:** Implementar `django-structlog` para rastrear ações críticas (criação de hackathons, alterações de notas).
+- [x] **Trilha de Auditoria:** Criar um modelo `AuditLog` para registrar quem alterou o quê e quando, especialmente para ações de Admin e Jurados.
+- [x] **Health Checks:** Adicionar endpoints de `/health/` para monitoramento de infraestrutura.
 
 ### 2. Experiência em Tempo Real (Fullstack)
 - **Notificações via WebSocket:** Usar Django Channels para notificar participantes instantaneamente quando uma submissão for avaliada ou um anúncio for feito.

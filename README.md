@@ -36,5 +36,7 @@ A plataforma utiliza um tema **Cyberpunk/Modern Dark** baseado em:
 
 - [x] **Sprint 1:** Fundação (Auth & Custom User)
 - [x] **Sprint 2:** Domínio Core (Hackathons & Teams)
-- [ ] **Sprint 3:** Submissões (Upload de Projetos)
-- [ ] **Sprint 4:** Avaliação (Painel do Jurado & Ranking)
+- [x] **Sprint 3:** Submissões (Upload de Projetos)
+- [x] **Sprint 4:** Avaliação (Painel do Jurado & Ranking)
+- [x] **Sprint 5:** Performance & Otimização
+- [ ] **Sprint 6:** Observabilidade & Engajamento
