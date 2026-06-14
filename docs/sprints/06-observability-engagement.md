@@ -10,17 +10,17 @@ Elevar o nível da plataforma de um MVP robusto para um sistema pronto para esca
 - [x] **Trilha de Auditoria:** Criar um modelo `AuditLog` para registrar quem alterou o quê e quando, especialmente para ações de Admin e Jurados.
 - [x] **Health Checks:** Adicionar endpoints de `/health/` para monitoramento de infraestrutura.
 
-### 2. Experiência em Tempo Real (Fullstack)
-- **Notificações via WebSocket:** Usar Django Channels para notificar participantes instantaneamente quando uma submissão for avaliada ou um anúncio for feito.
-- **Feed de Atividade:** Transformar a seção "Recent Activity" do Dashboard em um stream dinâmico de eventos do cluster.
+### 2. Experiência em Tempo Real (Fullstack) [CONCLUÍDO]
+- [x] **Notificações via WebSocket:** Usar Django Channels para notificar participantes instantaneamente quando uma submissão for avaliada ou um anúncio for feito.
+- [x] **Feed de Atividade:** Transformar a seção "Recent Activity" do Dashboard em um stream dinâmico de eventos do cluster.
 
-### 3. Dashboards Avançados (Frontend)
-- **Visualização de Dados:** Integrar `Recharts` para exibir gráficos de desempenho das equipes por critério.
-- **Analytics para Admin:** Painel com estatísticas de engajamento, média de notas por jurado e distribuição de submissões.
+### 3. Dashboards Avançados (Frontend) [CONCLUÍDO]
+- [x] **Visualização de Dados:** Integrar `Recharts` para exibir gráficos de desempenho das equipes por critério.
+- [x] **Analytics para Admin:** Painel com estatísticas de engajamento, média de notas por jurado e distribuição de submissões.
 
-### 4. Melhorias de Qualidade de Vida (UX)
-- **Filtros Avançados:** Busca e filtragem por tags, tecnologias e status em todas as listagens.
-- **Exportação de Dados:** Permitir que Admins exportem o ranking final em CSV/PDF para cerimônias de premiação.
+### 4. Melhorias de Qualidade de Vida (UX) [CONCLUÍDO]
+- [x] **Filtros Avançados:** Busca e filtragem por tags, tecnologias e status em todas as listagens.
+- [x] **Exportação de Dados:** Permitir que Admins exportem o ranking final em CSV/PDF para cerimônias de premiação.
 
 ---
 

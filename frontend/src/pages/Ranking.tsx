@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { evaluationService } from '../services/evaluation';
 import type { RankingEntry } from '../services/evaluation';
-import { Trophy, Medal, Award } from 'lucide-react';
+import { Trophy, Medal, Award, Download } from 'lucide-react';
 
 const Ranking: React.FC = () => {
   const { hackathonId } = useParams<{ hackathonId: string }>();
@@ -24,6 +24,31 @@ const Ranking: React.FC = () => {
     fetchRanking();
   }, [hackathonId]);
 
+  const exportToCSV = () => {
+    const headers = ['Posição', 'Time', 'Avaliações', 'Score Final'];
+    const rows = ranking.map((entry, index) => [
+      index + 1,
+      entry.team_name,
+      entry.evaluations_count,
+      entry.final_score.toFixed(2)
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(e => e.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `ranking_hackathon_${hackathonId}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) return <div className="p-8 text-center text-white">Carregando classificação...</div>;
 
   return (
@@ -36,9 +61,18 @@ const Ranking: React.FC = () => {
               RANKING_<span className="text-[var(--color-primary)]">FINAL</span>
             </h1>
           </div>
-          <Link to="/hackathons" className="text-xs font-bold text-[var(--text-light)] hover:text-white uppercase tracking-widest border-b border-white/10 pb-1">
-            Back_to_Events
-          </Link>
+          <div className="flex flex-col items-end gap-4">
+            <Link to="/hackathons" className="text-xs font-bold text-[var(--text-light)] hover:text-white uppercase tracking-widest border-b border-white/10 pb-1">
+              Back_to_Events
+            </Link>
+            <button 
+              onClick={exportToCSV}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition-all text-[10px] font-black uppercase tracking-widest"
+            >
+              <Download size={14} className="text-[var(--color-primary)]" />
+              Download_Report
+            </button>
+          </div>
         </header>
 
         <div className="space-y-4">
