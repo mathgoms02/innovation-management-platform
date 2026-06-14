@@ -1,95 +1,43 @@
 # GEMINI.md - Innovation Management Platform
 
 ## Project Overview
-This project is an **Innovation Management and Hackathon Platform** designed to manage users (Admin, Participant, Judge), teams, project submissions, and evaluations. It follows a decoupled architecture with a Python/Django backend and a React/TypeScript frontend.
+Plataforma completa para gestão de Hackathons, integrando participantes, jurados e administradores em um ecossistema com feedback em tempo real e auditoria estrita.
 
-### Architecture
-- **Backend:** Django 5.0 + Django REST Framework (DRF). Uses `SimpleJWT` for stateless authentication and `django-environ` for configuration.
-- **Frontend:** React 19 + TypeScript + Vite. Styled with Tailwind CSS. Uses `Axios` for API communication with a custom interceptor for JWT handling.
-- **Database:** PostgreSQL (configured for production), SQLite (currently used for development).
-- **Authentication:** JWT-based, with a custom User model supporting roles (ADMIN, PARTICIPANT, JUDGE).
+### Architecture Highlights
+- **Backend:** Django 5.0. Estrutura baseada em `Service Layer` para lógica de negócio e `Mixins` para auditoria automática.
+- **Frontend:** React 19 (Vite). Organizado por `features/` com suporte a `Context API` para Auth e Notificações.
+- **Real-time:** Integração de WebSockets via Django Channels para notificações instantâneas.
+- **Security:** RBAC (Role-Based Access Control) e conformidade com LGPD através de anonimização de dados.
 
 ---
 
 ## Directory Structure
-- `backend/`: Django application.
-  - `apps/`: Domain-specific Django apps (e.g., `users`, `hackathons`, `teams`).
-  - `core/`: Project configuration (settings, URLs).
-- `frontend/`: Vite + React application.
-  - `src/features/`: Domain-based logic and components.
-  - `src/services/`: API and other shared services.
-- `docs/`: Project documentation.
-  - `sprints/`: Sprint-by-sprint progress and decisions.
-- `instructions/`: Initial project mandates and instructions.
+- `backend/apps/`: Aplicativos de domínio (`users`, `hackathons`, `teams`, `submissions`, `evaluations`, `monitoring`).
+- `backend/apps/monitoring/`: Módulo central de saúde, logs de auditoria e lógica de WebSockets.
+- `frontend/src/features/`: Lógica de domínio (Auth, Submissões, Notificações).
+- `frontend/src/services/`: Camada de API, incluindo o `monitoringService`.
+- `docs/sprints/`: Histórico detalhado de decisões e progresso por sprint.
 
 ---
 
-## Architecture & Design Decisions
+## Key Design Decisions
 
-### Backend Service Layer
-To maintain clean views and ensure transactional integrity, business logic is encapsulated in `services.py` within each app. All domain actions (e.g., creating teams, joining hackathons, submitting evaluations) must pass through these services.
+### Observability & Audit
+- **Audit Logs:** Todo recurso que herda de `AuditMixin` registra automaticamente ações de CREATE/UPDATE/DELETE.
+- **Structured Logs:** Logs em JSON salvos localmente (excluídos do Git) para integração com ferramentas de análise.
 
-### LGPD & Security
-- **Consent:** Mandatory `has_accepted_terms` check during registration.
-- **Account Deletion:** Users have the right to permanent deletion (Hard Delete) via the Dashboard.
-- **Judge-Event Binding:** Judges can only access and evaluate hackathons they are explicitly assigned to via the `judges` ManyToMany field.
+### Real-time Experience
+- **Notification Engine:** Uso de `InMemoryChannelLayer` para testes e `RedisChannelLayer` para produção.
+- **Global Events:** Notificações disparadas via `send_global_notification` em serviços ou views.
 
-### Frontend Standards
-- **UI Patterns:** 
-  - **Auth Screens:** Modern dual-pane layout (Form + Visual Hero).
-  - **Main App:** Sidebar-based navigation for all authenticated routes.
-  - **Feedback:** Use `useToast` hook for all global notifications (Success/Error/Info).
-  - **Components:** Modular structure with dedicated components for Sidebar, Cards, and Inputs using Tailwind CSS custom classes (`btn-primary`, `card`, etc.).
+### Security & Privacy
+- **Judge assignment:** Acesso a submissões restrito a jurados vinculados ao hackathon.
+- **LGPD Deletion:** O método `delete` no `UserDetailView` não remove o registro, mas anonimiza PII (Personal Identifiable Information).
 
 ---
 
-## Roadmap Status
-- **Sprint 1 (Foundation):** Completed.
-- **Sprint 2 (Domain Core):** Completed.
-- **Sprint 3 (Submissions):** Completed.
-- **Sprint 4 (Evaluation & Security):** Completed. Scoring, Ranking, Judge RBAC, and LGPD.
-- **Sprint 5 (Performance & Polish):** Next. Focus on N+1 optimization, Skeletons, and final UX polish.
-
----
-
-## Building and Running
-
-### Backend
-1. **Navigate to backend:** `cd backend`
-2. **Create/Activate Virtual Env:** `python3 -m venv venv && source venv/bin/activate`
-3. **Install dependencies:** `pip install -r requirements.txt`
-4. **Environment Variables:** Create a `.env` file in `backend/` based on `backend/.env` template.
-5. **Run Migrations:** `python manage.py migrate`
-6. **Start Server:** `python manage.py runserver`
-
-### Frontend
-1. **Navigate to frontend:** `cd frontend`
-2. **Install dependencies:** `npm install`
-3. **Environment Variables:** Create a `.env` file in `frontend/` with `VITE_API_URL`.
-4. **Start Dev Server:** `npm run dev`
-
----
-
-## Development Conventions
-
-### Git Workflow
-- **Branching Strategy:** Use dedicated branches for each sprint (e.g., `sprint-01`, `sprint-02`).
-- **Conventional Commits:** Use standard prefixes (e.g., `feat:`, `fix:`, `docs:`, `refactor:`).
-- **Atomic Commits:** Commit by individual task or logical change. Avoid large, monolithic commits.
-- **Commit Only:** The agent must only perform `git commit`. **NEVER** perform `git push`.
-- **User Permission:** Always suggest a commit message and wait for explicit permission before committing.
-
-### Backend (Django)
-- **Domain-Based Structure:** Keep business logic in `apps/`.
-- **Service Layer:** Prefer placing complex logic in `services.py` within apps rather than in `views.py`.
-- **Clean Code:** Follow PEP 8 and use explicit type hints where possible.
-- **Custom User:** Always use the `users.User` model.
-
-### Frontend (React)
-- **Feature-Based Structure:** Organize code by feature under `src/features/`.
-- **TypeScript:** Use strict typing. Avoid `any`.
-- **Tailwind CSS:** Use Tailwind for all styling.
-- **Services:** Centralize API calls in `src/services/api.ts`.
-
-### Documentation
-- All major decisions and sprint progress must be documented in `docs/sprints/`.
+## Development Standards
+1. **Commits:** Mensagens semânticas (`feat:`, `fix:`, `docs:`).
+2. **Logic Placement:** Regras de negócio complexas devem residir em `services.py`.
+3. **Frontend Imports:** Utilizar `import type` para tipos TypeScript e caminhos relativos consistentes.
+4. **Validation:** Sempre validar critérios, prazos e permissões antes de persistir dados.
