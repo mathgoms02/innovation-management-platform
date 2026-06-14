@@ -34,6 +34,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_structlog',
+    'channels',
     # Local apps
     'apps.users',
     'apps.hackathons',
@@ -53,6 +55,20 @@ INSTALLED_APPS = [
     'apps.evaluations',
     'apps.monitoring',
 ]
+
+ASGI_APPLICATION = 'core.asgi.application'
+
+import sys
+TESTING = 'test' in sys.argv
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer' if TESTING else 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [env('REDIS_URL', default='redis://127.0.0.1:6379/1')],
+        } if not TESTING else {},
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

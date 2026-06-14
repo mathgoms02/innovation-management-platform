@@ -11,7 +11,7 @@ from apps.hackathons.permissions import IsAdminOrReadOnly
 from apps.hackathons.models import Hackathon
 from apps.submissions.models import Submission
 from apps.monitoring.mixins import AuditMixin
-from apps.monitoring.services import log_action
+from apps.monitoring.services import log_action, send_global_notification
 from ipware import get_client_ip
 
 class CriterionViewSet(AuditMixin, viewsets.ModelViewSet):
@@ -63,6 +63,9 @@ class EvaluationViewSet(AuditMixin, viewsets.ModelViewSet):
                 resource=evaluation,
                 ip_address=ip
             )
+            
+            # Notificação em tempo real
+            send_global_notification(f"Nova avaliação submetida para o time {evaluation.submission.team.name}!")
             
             return Response(
                 EvaluationSerializer(evaluation).data, 

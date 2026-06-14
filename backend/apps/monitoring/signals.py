@@ -8,13 +8,14 @@ import json
 
 User = get_user_model()
 
-@receiver(post_save, sender=Hackathon)
-def audit_hackathon_save(sender, instance, created, **kwargs):
-    action = 'CREATE' if created else 'UPDATE'
-    # Note: We don't have the request/user here easily via signals 
-    # unless we use a library or middleware to store the current user.
-    # For now, we'll log it without a user or find a way to get it.
-    pass
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from .services import log_action
 
-# Actually, logging in views/services is better if we want to capture the user easily
-# without adding complex middleware for thread-local storage of the user.
+@receiver(user_logged_in)
+def audit_login(sender, request, user, **kwargs):
+    log_action(user, 'LOGIN', user, ip_address=request.META.get('REMOTE_ADDR'))
+
+@receiver(user_logged_out)
+def audit_logout(sender, request, user, **kwargs):
+    if user:
+        log_action(user, 'LOGOUT', user, ip_address=request.META.get('REMOTE_ADDR'))

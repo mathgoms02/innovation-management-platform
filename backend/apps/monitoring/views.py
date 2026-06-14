@@ -1,8 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.db import connections
 from django.db.utils import OperationalError
+from .models import AuditLog
+from .serializers import AuditLogSerializer
 
 class HealthCheckView(APIView):
     permission_classes = [AllowAny]
@@ -25,3 +28,8 @@ class HealthCheckView(APIView):
             return Response(health_status, status=503)
 
         return Response(health_status)
+
+class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AuditLog.objects.select_related('user').all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [permissions.IsAdminUser]
