@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { evaluationService } from '../services/evaluation';
 import type { Criterion, EvaluationInput } from '../services/evaluation';
 import { getSubmissionById } from '../services/submission';
 import type { Submission } from '../services/submission';
-import { Star, Save, AlertCircle } from 'lucide-react';
+import { Save, AlertCircle } from 'lucide-react';
 
 const EvaluateSubmission: React.FC = () => {
   const { submissionId } = useParams<{ submissionId: string }>();

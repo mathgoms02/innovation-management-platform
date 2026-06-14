@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useToast } from '../components/Toast';
+import { useToast } from '../../components/Toast';
 
 interface NotificationContextType {
   lastNotification: string | null;
