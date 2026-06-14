@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
+import { useAuth } from '../features/auth/AuthContext';
 import api from '../services/api';
 
 const Register: React.FC = () => {
@@ -12,6 +13,7 @@ const Register: React.FC = () => {
     has_accepted_terms: false,
   });
   const { showToast } = useToast();
+  const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,9 +23,15 @@ const Register: React.FC = () => {
       return;
     }
     try {
-      await api.post('/users/register/', formData);
-      showToast('success', 'CADASTRO_FINALIZADO // BEM-VINDO_AO_CLUSTER');
-      navigate('/login');
+      const response = await api.post('/users/register/', formData);
+      const { access, refresh, user } = response.data;
+      
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      authLogin(user);
+
+      showToast('CADASTRO_FINALIZADO // BEM-VINDO_AO_CLUSTER', 'success');
+      navigate('/');
     } catch (err: any) {
       showToast('error', err.response?.data?.detail || 'ERRO_DE_PROCESSAMENTO // VERIFIQUE_OS_DADOS');
     }
