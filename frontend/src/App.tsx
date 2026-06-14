@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import { NotificationProvider } from './features/auth/NotificationContext';
 import { ToastProvider } from './components/Toast';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -23,7 +24,8 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
+        <NotificationProvider>
+          <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -77,8 +79,10 @@ function App() {
             />
           </Routes>
         </Router>
-      </ToastProvider>
-    </AuthProvider>
+        </NotificationProvider>
+        </ToastProvider>
+        </AuthProvider>
+
   );
 }
 
