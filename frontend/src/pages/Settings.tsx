@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { useToast } from '../components/Toast';
 import api from '../services/api';
-import { User, Shield, Palette, Trash2, AlertTriangle, Save, Camera, X } from 'lucide-react';
+import { User as UserIcon, Shield, Palette, Trash2, AlertTriangle, Save, Camera } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const { user, logout } = useAuth();
@@ -25,9 +25,9 @@ const Settings: React.FC = () => {
     setSaving(true);
     try {
       await api.patch('/users/me/', formData);
-      showToast('PROFILE_UPDATED // DADOS_SINCRONIZADOS', 'success');
+      showToast('success', 'PROFILE_UPDATED // DADOS_SINCRONIZADOS');
     } catch (err: any) {
-      showToast('SYNC_ERROR // FALHA_NA_ATUALIZAÇÃO', 'error');
+      showToast('error', 'SYNC_ERROR // FALHA_NA_ATUALIZAÇÃO');
     } finally {
       setSaving(false);
     }
@@ -35,17 +35,17 @@ const Settings: React.FC = () => {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== `deletar_${user?.username}`) {
-      showToast('VALIDATION_FAILED // TEXTO_INCORRETO', 'error');
+      showToast('error', 'VALIDATION_FAILED // TEXTO_INCORRETO');
       return;
     }
 
     try {
       await api.delete('/users/me/');
-      showToast('ACCOUNT_TERMINATED // DADOS_ANONIMIZADOS', 'info');
+      showToast('info', 'ACCOUNT_TERMINATED // DADOS_ANONIMIZADOS');
       logout();
       navigate('/login');
     } catch (err: any) {
-      showToast('DELETE_ERROR // FALHA_NA_EXCLUSÃO', 'error');
+      showToast('error', 'DELETE_ERROR // FALHA_NA_EXCLUSÃO');
     }
   };
 
@@ -73,7 +73,7 @@ const Settings: React.FC = () => {
           {/* Sidebar Tabs */}
           <aside className="space-y-2">
             {[
-              { id: 'profile', label: 'User_Profile', icon: User },
+              { id: 'profile', label: 'User_Profile', icon: UserIcon },
               { id: 'security', label: 'Security_Lock', icon: Shield },
               { id: 'prefs', label: 'Preferences', icon: Palette },
             ].map((tab) => (
@@ -104,8 +104,8 @@ const Settings: React.FC = () => {
 
           {/* Content Area */}
           <main className="lg:col-span-3 card p-12 border-white/5 min-h-[600px] relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-                <Settings size={200} />
+            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none text-white text-[10px] font-black uppercase tracking-[0.4em]">
+                Core_Protocol_v2
             </div>
 
             {activeTab === 'profile' && (

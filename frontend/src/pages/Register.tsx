@@ -30,7 +30,7 @@ const Register: React.FC = () => {
       localStorage.setItem('refresh_token', refresh);
       authLogin(user);
 
-      showToast('CADASTRO_FINALIZADO // BEM-VINDO_AO_CLUSTER', 'success');
+      showToast('success', 'CADASTRO_FINALIZADO // BEM-VINDO_AO_CLUSTER');
       navigate('/');
     } catch (err: any) {
       showToast('error', err.response?.data?.detail || 'ERRO_DE_PROCESSAMENTO // VERIFIQUE_OS_DADOS');
