@@ -1,10 +1,12 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, RegisterSerializer
 
 User = get_user_model()
 
+from apps.monitoring.services import log_action
+from ipware import get_client_ip
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterView(generics.CreateAPIView):
