@@ -34,6 +34,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,13 +45,30 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'django_structlog',
+    'channels',
     # Local apps
     'apps.users',
     'apps.hackathons',
     'apps.teams',
     'apps.submissions',
     'apps.evaluations',
+    'apps.monitoring',
 ]
+
+ASGI_APPLICATION = 'core.asgi.application'
+
+import sys
+TESTING = 'test' in sys.argv
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer' if TESTING else 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [env('REDIS_URL', default='redis://127.0.0.1:6379/1')],
+        } if not TESTING else {},
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_structlog.middlewares.RequestMiddleware',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -156,3 +175,50 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import structlog
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.format_exc_info,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.JSONRenderer(),
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json_formatter": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.JSONRenderer(),
+        },
+        "plain_console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(),
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "plain_console",
+        },
+        "json_file": {
+            "class": "logging.handlers.WatchedFileHandler",
+            "filename": BASE_DIR / "logs/json.log",
+            "formatter": "json_formatter",
+        },
+    },
+    "loggers": {
+        "django_structlog": {
+            "handlers": ["console", "json_file"],
+            "level": "INFO",
+        },
+        # Optional: Add other loggers if needed
+    },
+}

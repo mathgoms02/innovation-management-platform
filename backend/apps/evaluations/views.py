@@ -10,8 +10,11 @@ from .permissions import IsJudge, IsAdminOrJudge
 from apps.hackathons.permissions import IsAdminOrReadOnly
 from apps.hackathons.models import Hackathon
 from apps.submissions.models import Submission
+from apps.monitoring.mixins import AuditMixin
+from apps.monitoring.services import log_action, send_global_notification
+from ipware import get_client_ip
 
-class CriterionViewSet(viewsets.ModelViewSet):
+class CriterionViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Criterion.objects.all()
     serializer_class = CriterionSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -22,7 +25,7 @@ class CriterionViewSet(viewsets.ModelViewSet):
             return self.queryset.filter(hackathon_id=hackathon_id)
         return self.queryset
 
-class EvaluationViewSet(viewsets.ModelViewSet):
+class EvaluationViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Evaluation.objects.select_related('judge', 'submission__team').prefetch_related('scores__criterion')
     serializer_class = EvaluationSerializer
     
@@ -51,6 +54,19 @@ class EvaluationViewSet(viewsets.ModelViewSet):
                 scores_data=serializer.validated_data['scores'],
                 comments=serializer.validated_data.get('comments')
             )
+            
+            # Manual Audit for custom Create
+            ip, _ = get_client_ip(request)
+            log_action(
+                user=request.user,
+                action='CREATE',
+                resource=evaluation,
+                ip_address=ip
+            )
+            
+            # Notificação em tempo real
+            send_global_notification(f"Nova avaliação submetida para o time {evaluation.submission.team.name}!")
+            
             return Response(
                 EvaluationSerializer(evaluation).data, 
                 status=status.HTTP_201_CREATED

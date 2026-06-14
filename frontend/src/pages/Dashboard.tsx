@@ -1,8 +1,12 @@
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import api from '../services/api';
-import { LayoutDashboard, Trophy, Users, FileText, Settings, LogOut, Bell, Search, Trash2 } from 'lucide-react';
+import { monitoringService } from '../services/monitoring';
+import type { AuditLog } from '../services/monitoring';
+import { LayoutDashboard, Trophy, Users, FileText, Settings, LogOut, Bell, Search, Trash2, Activity } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface SidebarItemProps {
   icon: LucideIcon;
@@ -28,6 +32,36 @@ const SidebarItem = ({ icon: Icon, label, to, active = false }: SidebarItemProps
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(true);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (user?.role === 'ADMIN') {
+        try {
+          const data = await monitoringService.getLogs();
+          setLogs(data.slice(0, 5));
+        } catch (error) {
+          console.error('Erro ao buscar logs:', error);
+        } finally {
+          setLoadingLogs(false);
+        }
+      } else {
+        setLoadingLogs(false);
+      }
+    };
+
+    fetchLogs();
+  }, [user]);
+
+  // Mock data for the chart
+  const chartData = [
+    { name: 'S1', value: 400, color: 'var(--color-primary)' },
+    { name: 'S2', value: 300, color: 'var(--color-secondary)' },
+    { name: 'S3', value: 200, color: '#fff' },
+    { name: 'S4', value: 278, color: 'var(--color-primary)' },
+    { name: 'S5', value: 189, color: 'var(--color-secondary)' },
+  ];
 
   const handleDeleteAccount = async () => {
     if (window.confirm('ALERTA CRÍTICO: Esta ação excluirá permanentemente todos os seus dados pessoais (LGPD). Deseja continuar?')) {
@@ -150,21 +184,60 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
               <section className="lg:col-span-2 space-y-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-black uppercase tracking-widest italic italic">Recent_Activity</h3>
+                  <h3 className="text-xl font-black uppercase tracking-widest italic tracking-tighter">Recent_Activity</h3>
                   <button className="text-[10px] font-bold text-[var(--color-primary)] hover:underline">VIEW_ALL</button>
                 </div>
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="card flex items-center gap-6 p-4 border-white/5 bg-white/[0.02]">
-                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center text-[var(--color-primary)]">
-                      <Bell size={20} />
+                
+                {loadingLogs ? (
+                  <div className="text-[10px] uppercase tracking-widest text-white/20">Loading_Logs...</div>
+                ) : logs.length > 0 ? (
+                  logs.map((log) => (
+                    <div key={log.id} className="card flex items-center gap-6 p-4 border-white/5 bg-white/[0.02]">
+                      <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center text-[var(--color-primary)]">
+                        <Activity size={20} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-white uppercase tracking-wider">
+                          {log.action} - {log.resource_type}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-light)] uppercase tracking-widest mt-1">
+                          User: {log.user_email} | Resource ID: {log.resource_id}
+                        </p>
+                      </div>
+                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </p>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-white uppercase tracking-wider">Novo Hackathon Publicado</p>
-                      <p className="text-[10px] text-[var(--text-light)] uppercase tracking-widest mt-1">Hackathon "Global AI Challenge" iniciou fase de inscrições.</p>
-                    </div>
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">2h_AGO</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-[10px] text-white/20 uppercase tracking-widest italic">No dynamic activity available.</p>
+                )}
+
+                <div className="mt-12 h-64 card p-6 border-white/5 bg-white/[0.01]">
+                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-light)] mb-6">Performance_Metrics</p>
+                   <ResponsiveContainer width="100%" height="80%">
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="rgba(255,255,255,0.3)" 
+                        fontSize={10} 
+                        tickLine={false} 
+                        axisLine={false}
+                      />
+                      <YAxis hide />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px' }}
+                        itemStyle={{ color: 'var(--color-primary)' }}
+                      />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                   </ResponsiveContainer>
+                </div>
               </section>
 
               <section className="space-y-6">

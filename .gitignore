@@ -11,3 +11,6 @@ node_modules
 
 # AI
 instructions/
+# Logs
+backend/logs/
+*.log
