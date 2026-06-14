@@ -22,12 +22,20 @@ def log_action(user, action, resource, changes=None, ip_address=None):
 def send_global_notification(message):
     """
     Sends a notification to all connected users via WebSocket.
+    Resilient to channel layer errors (e.g. Redis down).
     """
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "notifications",
-        {
-            "type": "send_notification",
-            "message": message
-        }
-    )
+    try:
+        channel_layer = get_channel_layer()
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                "notifications",
+                {
+                    "type": "send_notification",
+                    "message": message
+                }
+            )
+    except Exception as e:
+        # Log error but don't crash the request
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to send global notification: {e}")
