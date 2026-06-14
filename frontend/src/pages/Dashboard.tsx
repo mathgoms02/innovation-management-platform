@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
+import { useNotifications } from '../features/auth/NotificationContext';
 import api from '../services/api';
 import { monitoringService } from '../services/monitoring';
 import type { AuditLog } from '../services/monitoring';
@@ -31,9 +32,12 @@ const SidebarItem = ({ icon: Icon, label, to, active = false }: SidebarItemProps
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { notifications, clearNotifications } = useNotifications();
   const navigate = useNavigate();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -95,7 +99,7 @@ const Dashboard: React.FC = () => {
           <SidebarItem icon={Users} label="Equipes" to="#" />
           <SidebarItem icon={FileText} label="Submissões" to="/submissions" />
           <div className="mt-8 mb-2 px-6 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Preferences</div>
-          <SidebarItem icon={Settings} label="Settings" to="#" />
+          <SidebarItem icon={Settings} label="Settings" to="/settings" />
           
           <button 
             onClick={handleDeleteAccount}
@@ -129,21 +133,86 @@ const Dashboard: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-6">
-            <button className="relative text-[var(--text-light)] hover:text-white transition-colors">
-              <Bell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--color-secondary)] rounded-full"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative text-[var(--text-light)] hover:text-white transition-colors"
+              >
+                <Bell size={20} />
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--color-secondary)] rounded-full shadow-[0_0_10px_var(--color-secondary)]"></span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-4 w-80 bg-[var(--color-bg-secondary)] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                  <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white italic">Protocol_Stream</span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearNotifications();
+                      }}
+                      className="text-[8px] font-black uppercase tracking-widest text-[var(--color-primary)] hover:underline"
+                    >
+                      Clear_All
+                    </button>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                    {notifications.length > 0 ? (
+                      notifications.map(n => (
+                        <div key={n.id} className="p-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                          <p className="text-[10px] text-white uppercase tracking-wider leading-relaxed group-hover:text-[var(--color-primary)] transition-colors">{n.message}</p>
+                          <p className="text-[8px] text-[var(--text-light)] mt-2 uppercase">{n.timestamp.toLocaleTimeString()}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-12 text-center">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/20 italic">No_new_data_stream</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="h-8 w-px bg-white/10"></div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-[10px] font-black text-white uppercase tracking-wider">{user?.username}</p>
-                <p className="text-[8px] font-bold text-[var(--color-primary)] uppercase tracking-[0.2em]">{user?.role}</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] p-[1px]">
-                <div className="w-full h-full rounded-lg bg-[var(--color-bg-secondary)] flex items-center justify-center font-black text-xs">
-                  {user?.username?.substring(0, 2).toUpperCase()}
+            
+            <div className="relative">
+              <div 
+                className="flex items-center gap-4 cursor-pointer group"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+              >
+                <div className="text-right">
+                  <p className="text-[10px] font-black text-white uppercase tracking-wider">{user?.username}</p>
+                  <p className="text-[8px] font-bold text-[var(--color-primary)] uppercase tracking-[0.2em]">{user?.role}</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] p-[1px] group-hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all">
+                  <div className="w-full h-full rounded-lg bg-[var(--color-bg-secondary)] flex items-center justify-center font-black text-xs">
+                    {user?.username?.substring(0, 2).toUpperCase()}
+                  </div>
                 </div>
               </div>
+
+              {showUserMenu && (
+                <div className="absolute right-0 mt-4 w-48 bg-[var(--color-bg-secondary)] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animation-fade-in">
+                  <button 
+                    onClick={() => navigate('/settings')}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-[var(--text-light)] hover:bg-white/5 hover:text-white transition-all"
+                  >
+                    <Settings size={14} />
+                    Settings
+                  </button>
+                  <div className="h-px bg-white/5"></div>
+                  <button 
+                    onClick={logout}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/5 transition-all"
+                  >
+                    <LogOut size={14} />
+                    Terminate
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -159,8 +228,8 @@ const Dashboard: React.FC = () => {
               <h2 className="text-5xl font-black tracking-tighter text-white mb-4">
                 SYSTEM_<span className="text-[var(--color-primary)]">ACTIVE</span>
               </h2>
-              <p className="text-[var(--text-light)] max-w-lg leading-relaxed">
-                Bem-vindo ao terminal de controle. Você está operando como <span className="text-[var(--color-primary)] font-bold">{user?.role}</span>. 
+              <p className="text-[var(--text-light)] max-w-lg leading-relaxed uppercase text-[10px] tracking-widest font-bold">
+                Bem-vindo ao terminal de controle. Você está operando como <span className="text-[var(--color-primary)]">{user?.role}</span>. 
                 Sincronização completa com o cluster de inovação.
               </p>
             </section>
