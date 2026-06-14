@@ -52,3 +52,6 @@ Tema **Cyberpunk/Modern Dark**:
 - [x] **Sprint 4:** Avaliação (Painel do Jurado & Ranking)
 - [x] **Sprint 5:** Performance & Refatoração (UX/N+1)
 - [x] **Sprint 6:** Observabilidade & Engajamento (Logs/Audit/WebSockets)
+- [ ] **Sprint 7:** UX Base, Settings e Retenção
+- [ ] **Sprint 8:** O Papel do Organizador e Refinamentos
+- [ ] **Sprint 9:** Dinâmica de Equipes e Descoberta
