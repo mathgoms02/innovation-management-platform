@@ -10,6 +10,7 @@ import Submissions from './pages/Submissions';
 import Ranking from './pages/Ranking';
 import JudgeDashboard from './pages/JudgeDashboard';
 import EvaluateSubmission from './pages/EvaluateSubmission';
+import Settings from './pages/Settings';
 import './App.css';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -74,6 +75,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <EvaluateSubmission />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Settings />
                 </PrivateRoute>
               }
             />
