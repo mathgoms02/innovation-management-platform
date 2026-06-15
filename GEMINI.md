@@ -31,8 +31,10 @@ Plataforma completa para gestão de Hackathons, integrando participantes, jurado
 - **Global Events:** Notificações disparadas via `send_global_notification` em serviços ou views.
 
 ### Security & Privacy
-- **Judge assignment:** Acesso a submissões restrito a jurados vinculados ao hackathon.
-- **LGPD Deletion:** O método `delete` no `UserDetailView` não remove o registro, mas anonimiza PII (Personal Identifiable Information).
+- **RBAC (Role-Based Access Control):** Papéis definidos no modelo User (`ADMIN`, `ORGANIZER`, `JUDGE`, `PARTICIPANT`).
+- **Permissions:** A classe `IsAdminOrOrganizerOrReadOnly` garante que um `ORGANIZER` possa criar hackathons e publicar anúncios, mas só possa editar os eventos criados por ele mesmo (verificado pelo campo `Hackathon.organizer`).
+- **Judge assignment:** Acesso ao painel de avaliação restrito a jurados (`JUDGE`) vinculados especificamente ao hackathon em questão. O painel de submissão do participante é bloqueado (View-Only) para `JUDGE` e `ORGANIZER`.
+- **LGPD Deletion:** O método `delete` no `UserDetailView` não remove o registro físico, mas sim anonimiza PII (Personal Identifiable Information), alterando e-mail, nomes e ofuscando a senha.
 
 ---
 
