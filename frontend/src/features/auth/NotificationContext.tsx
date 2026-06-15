@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useToast } from '../../components/Toast';
+import { useAuth } from './AuthContext';
 
 export interface Notification {
   id: string;
@@ -17,10 +18,16 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const clearNotifications = () => setNotifications([]);
 
   useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+
     const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/notifications/';
     const socket = new WebSocket(wsUrl);
 
@@ -33,18 +40,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           timestamp: new Date(),
         };
         setNotifications(prev => [newNotification, ...prev]);
-        showToast(data.message, 'info');
+        showToast('info', data.message);
       }
     };
 
     socket.onclose = () => {
-      console.log('WebSocket disconnected. Attempting to reconnect...');
+      console.log('WebSocket disconnected.');
     };
 
     return () => {
       socket.close();
     };
-  }, [showToast]);
+  }, [showToast, user]);
 
   return (
     <NotificationContext.Provider value={{ notifications, clearNotifications }}>

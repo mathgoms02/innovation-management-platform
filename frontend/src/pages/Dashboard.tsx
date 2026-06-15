@@ -100,14 +100,6 @@ const Dashboard: React.FC = () => {
           <SidebarItem icon={FileText} label="Submissões" to="/submissions" />
           <div className="mt-8 mb-2 px-6 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Preferences</div>
           <SidebarItem icon={Settings} label="Settings" to="/settings" />
-          
-          <button 
-            onClick={handleDeleteAccount}
-            className="flex items-center gap-4 px-6 py-4 text-red-500/50 hover:text-red-500 hover:bg-red-500/5 transition-all group mt-auto mb-4"
-          >
-            <Trash2 size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Delete_Account</span>
-          </button>
         </nav>
 
         <button 
