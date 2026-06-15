@@ -5,7 +5,7 @@ Uma plataforma moderna e escalável para gestão de Hackathons, times e submiss�
 ## 🚀 Tecnologias
 
 - **Backend:** Django 5.0 + Django REST Framework (DRF)
-  - **Autenticação:** SimpleJWT com Auditoria de Login.
+  - **Autenticação:** SimpleJWT com Auditoria de Login e Role-Based Access Control (Admin, Organizer, Participant, Judge).
   - **Real-time:** Django Channels + Daphne + Redis.
   - **Observabilidade:** Structured Logging (structlog) + Audit Trail + Health Checks.
 - **Frontend:** React 19 + TypeScript + Vite
@@ -15,7 +15,7 @@ Uma plataforma moderna e escalável para gestão de Hackathons, times e submiss�
 
 ## ✨ Funcionalidades Principais
 
-- **Gestão de Hackathons:** Fluxo completo de criação, gestão de inscritos e critérios de avaliação.
+- **Gestão de Hackathons:** Fluxo completo de criação e gestão de eventos, descentralizado através do papel de Organizador.
 - **Sistema de Equipes:** Formação de times e submissão de projetos com controle de prazos.
 - **Painel do Jurado:** Interface dedicada para avaliação baseada em critérios ponderados.
 - **Ranking Dinâmico:** Cálculo automático de notas e exportação de resultados em CSV.
@@ -54,5 +54,5 @@ Tema **Cyberpunk/Modern Dark**:
 - [x] **Sprint 6:** Observabilidade & Engajamento (Logs/Audit/WebSockets)
 - [x] **Sprint 7:** UX Base, Settings e Retenção
 - [x] **Sprint 8:** Dashboard Dinâmica & Dados Reais
-- [ ] **Sprint 9:** O Papel do Organizador e Refinamentos
+- [x] **Sprint 9:** O Papel do Organizador e Refinamentos
 - [ ] **Sprint 10:** Dinâmica de Equipes e Descoberta

@@ -4,6 +4,7 @@ from django.db import models
 class User(AbstractUser):
     class Role(models.TextChoices):
         ADMIN = 'ADMIN', 'Administrador'
+        ORGANIZER = 'ORGANIZER', 'Organizador'
         PARTICIPANT = 'PARTICIPANT', 'Participante'
         JUDGE = 'JUDGE', 'Jurado'
 

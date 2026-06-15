@@ -21,6 +21,13 @@ class Hackathon(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    organizer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='organized_hackathons',
+        null=True,
+        blank=True
+    )
     judges = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name='hackathons_to_judge',

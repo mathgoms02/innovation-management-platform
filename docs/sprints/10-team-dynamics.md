@@ -1,4 +1,4 @@
-# Sprint 9: Dinâmica de Equipes e Descoberta de Eventos
+# Sprint 10: Dinâmica de Equipes e Descoberta de Eventos
 
 ## Objetivo
 Melhorar a jornada do Participante na formação de times e busca por hackathons.

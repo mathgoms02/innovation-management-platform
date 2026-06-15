@@ -35,10 +35,12 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuditLogSerializer
     permission_classes = [permissions.IsAdminUser]
 
-class AnnouncementViewSet(viewsets.ReadOnlyModelViewSet):
+from apps.hackathons.permissions import IsAdminOrOrganizerOrReadOnly
+
+class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = Announcement.objects.filter(is_active=True)
     serializer_class = AnnouncementSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrOrganizerOrReadOnly]
 
 class UserStatsView(APIView):
     permission_classes = [IsAuthenticated]
