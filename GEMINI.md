@@ -39,7 +39,12 @@ Plataforma completa para gestão de Hackathons, integrando participantes, jurado
 ---
 
 ## Development Standards
-1. **Commits:** Mensagens semânticas (`feat:`, `fix:`, `docs:`).
-2. **Logic Placement:** Regras de negócio complexas devem residir em `services.py`.
-3. **Frontend Imports:** Utilizar `import type` para tipos TypeScript e caminhos relativos consistentes.
-4. **Validation:** Sempre validar critérios, prazos e permissões antes de persistir dados.
+
+### Diretrizes de Código & Arquitetura
+1. **Commits:** Mensagens semânticas em inglês (`feat:`, `fix:`, `docs:`) e atômicas por funcionalidade ou task completada na sprint.
+2. **Backend (Service Layer):** Regras de negócio, criação de dados complexos (ex: RBAC, criação de times) e lógicas de auditoria DEVEM residir exclusivamente nos arquivos `services.py` de cada app. Views e ViewSets devem permanecer "magros" focando apenas em validação de entrada e roteamento.
+3. **Frontend (Estrutura):**
+   - **CSS Grid:** O uso de **CSS Grid** é OBRIGATÓRIO ao estruturar novos layouts complexos (como páginas de Settings, Dashboards de Equipes, Painéis de Administração). Evite aninhamentos desnecessários de Flexbox quando o Grid for mais semântico para a estrutura da página.
+   - **Estética Cyberpunk Minimalista:** Mantenha a consistência visual em todos os novos componentes. O fundo deve permanecer escuro (`#0b0c10` ou variantes), utilizando tons neon **Cyan (`#00f0ff`)** e **Magenta (`#ff007a`)** estrategicamente para feedbacks visuais, botões de ação (ex: `btn-primary`, `btn-secondary`), ícones ativos e bordas em foco.
+   - **Imports:** Utilizar a sintaxe `import type` para importar interfaces TypeScript, garantindo o funcionamento correto com o compialador do Vite (`verbatimModuleSyntax`).
+4. **Validation First:** Sempre validar na API e no Frontend regras como permissões, status do evento e associação do usuário antes de permitir mutações (CREATE/UPDATE/DELETE).
