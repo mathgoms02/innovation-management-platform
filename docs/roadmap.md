@@ -34,7 +34,7 @@ Este documento contém o planejamento estratégico completo do projeto, servindo
 ### Sprint 7: UX Base, Settings e Retenção (Concluída)
 - **Objetivo:** Login automático no cadastro, página de Settings (CSS Grid) e segurança LGPD.
 
-### Sprint 8: Dashboard Dinâmica & Dados Reais (A Iniciar)
+### Sprint 8: Dashboard Dinâmica & Dados Reais (Concluída)
 - **Objetivo:** Substituir mocks por métricas reais, gráficos dinâmicos e sistema de anúncios.
 
 ### Sprint 9: O Papel do Organizador e Refinamentos (Pendente)

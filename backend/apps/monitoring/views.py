@@ -1,11 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import connections
 from django.db.utils import OperationalError
-from .models import AuditLog
-from .serializers import AuditLogSerializer
+from .models import AuditLog, Announcement
+from .serializers import AuditLogSerializer, AnnouncementSerializer
+from .services import get_user_stats, get_performance_chart_data
 
 class HealthCheckView(APIView):
     permission_classes = [AllowAny]
@@ -33,3 +34,19 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AuditLog.objects.select_related('user').all()
     serializer_class = AuditLogSerializer
     permission_classes = [permissions.IsAdminUser]
+
+class AnnouncementViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Announcement.objects.filter(is_active=True)
+    serializer_class = AnnouncementSerializer
+    permission_classes = [IsAuthenticated]
+
+class UserStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        stats = get_user_stats(request.user)
+        chart_data = get_performance_chart_data(request.user)
+        return Response({
+            "stats": stats,
+            "chart_data": chart_data
+        })

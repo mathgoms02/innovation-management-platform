@@ -3,30 +3,26 @@
 ## Objetivo
 Substituir todos os dados estáticos (mocks) da Dashboard por métricas reais calculadas pelo backend em tempo real.
 
-## Tarefas Propostas
+## Tarefas Realizadas
 
-### 1. API de Estatísticas (Backend)
-- [ ] **Service de Métricas:** Criar um serviço centralizado para calcular:
-    - Total de Hackathons Ativos.
-    - Número de equipes que o usuário participa.
-    - Contagem de notificações não lidas.
-    - XP Total (baseado em submissões e avaliações).
-- [ ] **Endpoint `/api/monitoring/stats/`:** Disponibilizar esses dados para o frontend.
+### 1. API de Estatísticas (Backend) [CONCLUÍDO]
+- [x] **Service de Métricas:** Criado serviço centralizado em `monitoring/services.py` para calcular Hackathons ativos, times, XP e média de notas.
+- [x] **Endpoint `/api/monitoring/stats/`:** Implementado e protegido por autenticação.
 
-### 2. Gráficos com Dados Reais (Fullstack)
-- [ ] **Métricas de Performance:** Implementar lógica para buscar o histórico de avaliações do usuário/equipe e popular o gráfico de barras.
-- [ ] **Agregações DRF:** Utilizar `Count` e `Avg` para gerar os dados do gráfico de forma eficiente.
+### 2. Gráficos com Dados Reais (Fullstack) [CONCLUÍDO]
+- [x] **Métricas de Performance:** Lógica implementada para buscar a média de notas por equipe e popular o gráfico dinamicamente.
+- [x] **Agregações DRF:** Utilização eficiente de `Avg` e `Count`.
 
-### 3. Sistema de Anúncios (Backend)
-- [ ] **Modelo Announcement:** Criar modelo para "Cluster News" (Título, Conteúdo, Tipo, Data).
-- [ ] **CRUD Admin:** Permitir que administradores publiquem notícias que aparecerão na dashboard.
+### 3. Sistema de Anúncios (Backend) [CONCLUÍDO]
+- [x] **Modelo Announcement:** Criado modelo para notícias do sistema com categorias (INFO, URGENT, etc.).
+- [x] **CRUD Admin:** Registrado no Django Admin para publicação dinâmica.
 
-### 4. Integração Frontend
-- [ ] **Data Fetching:** Conectar os componentes de Stats, Chart e News aos novos endpoints.
-- [ ] **Auto-refresh:** Garantir que a dashboard se atualize quando novos dados (como avaliações) chegarem via WebSocket.
+### 4. Integração Frontend [CONCLUÍDO]
+- [x] **Data Fetching:** Dashboard refatorada para utilizar `useCallback` e sincronizar todos os dados via `monitoringService`.
+- [x] **Auto-refresh:** A dashboard agora se auto-atualiza quando recebe notificações via WebSocket (como novas avaliações).
 
 ---
 
-## Diretrizes Técnicas
-- **Performance:** Utilizar cache (se necessário) para métricas pesadas.
-- **WebSocket Integration:** Sincronizar o estado da Dashboard com os eventos do `NotificationProvider`.
+## Diretrizes Técnicas Seguidas
+- **Consistência:** Gráfico utiliza o padrão de cores do tema (Cyan/Magenta) baseado na performance.
+- **Resiliência:** Tratamento de erros no carregamento para evitar que falhas em um serviço quebrem toda a dashboard.
