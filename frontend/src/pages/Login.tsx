@@ -7,7 +7,7 @@ import api from '../services/api';
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { login: authLogin } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -15,7 +15,12 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       const response = await api.post('/users/login/', { username, password });
-      login(response.data);
+      const { access, refresh, user } = response.data;
+      
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      authLogin(user);
+
       showToast('success', 'AUTENTICAÇÃO_BEM_SUCEDIDA // ACESSO_LIBERADO');
       navigate('/');
     } catch (err: any) {

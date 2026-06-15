@@ -1,16 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../../services/api';
 
-interface User {
+export interface User {
   id: number;
   username: string;
   email: string;
   role: string;
+  bio?: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (tokens: { access: string; refresh: string }) => void;
+  login: (userData: User) => void;
   logout: () => void;
   loading: boolean;
 }
@@ -44,10 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (tokens: { access: string; refresh: string }) => {
-    localStorage.setItem('access_token', tokens.access);
-    localStorage.setItem('refresh_token', tokens.refresh);
-    fetchUser();
+  const login = (userData: User) => {
+    setUser(userData);
   };
 
   const logout = () => {

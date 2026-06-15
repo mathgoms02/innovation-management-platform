@@ -1,15 +1,24 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useToast } from '../../components/Toast';
 
+export interface Notification {
+  id: string;
+  message: string;
+  timestamp: Date;
+}
+
 interface NotificationContextType {
-  lastNotification: string | null;
+  notifications: Notification[];
+  clearNotifications: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lastNotification, setLastNotification] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { showToast } = useToast();
+
+  const clearNotifications = () => setNotifications([]);
 
   useEffect(() => {
     const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/notifications/';
@@ -18,14 +27,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.message) {
-        setLastNotification(data.message);
+        const newNotification: Notification = {
+          id: Math.random().toString(36).substring(7),
+          message: data.message,
+          timestamp: new Date(),
+        };
+        setNotifications(prev => [newNotification, ...prev]);
         showToast(data.message, 'info');
       }
     };
 
     socket.onclose = () => {
       console.log('WebSocket disconnected. Attempting to reconnect...');
-      // Simplistic reconnect logic could go here
     };
 
     return () => {
@@ -34,7 +47,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [showToast]);
 
   return (
-    <NotificationContext.Provider value={{ lastNotification }}>
+    <NotificationContext.Provider value={{ notifications, clearNotifications }}>
       {children}
     </NotificationContext.Provider>
   );
