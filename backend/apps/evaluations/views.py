@@ -7,7 +7,7 @@ from .serializers import (
 )
 from .services import EvaluationService
 from .permissions import IsJudge, IsAdminOrJudge
-from apps.hackathons.permissions import IsAdminOrReadOnly
+from apps.hackathons.permissions import IsAdminOrOrganizerOrReadOnly
 from apps.hackathons.models import Hackathon
 from apps.submissions.models import Submission
 from apps.monitoring.mixins import AuditMixin
@@ -17,7 +17,7 @@ from ipware import get_client_ip
 class CriterionViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Criterion.objects.all()
     serializer_class = CriterionSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrOrganizerOrReadOnly]
 
     def get_queryset(self):
         hackathon_id = self.request.query_params.get('hackathon_id')

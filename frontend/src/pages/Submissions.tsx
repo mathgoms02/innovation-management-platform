@@ -5,8 +5,10 @@ import { getHackathons, type Hackathon } from '../services/hackathon';
 import SubmissionForm from '../features/submissions/SubmissionForm';
 import { LayoutDashboard, Send, Clock, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext';
 
 const Submissions: React.FC = () => {
+  const { user } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
@@ -35,6 +37,27 @@ const Submissions: React.FC = () => {
   }, []);
 
   if (loading) return <div className="p-12 text-center text-white/50 font-black uppercase tracking-widest">Sincronizando...</div>;
+
+  if (user?.role === 'JUDGE' || user?.role === 'ORGANIZER') {
+    return (
+      <div className="min-h-screen bg-[var(--color-bg)] p-12 flex flex-col items-center justify-center text-center">
+        <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic mb-4">
+          Acesso_<span className="text-[var(--color-primary)]">View-Only</span>
+        </h1>
+        <p className="text-[10px] text-[var(--text-light)] uppercase tracking-[0.3em] mb-8 max-w-md">
+          Como {user.role}, o envio de projetos é restrito a Participantes. Seu papel é estritamente focado em visualização e avaliação.
+        </p>
+        <div className="flex gap-4">
+          <Link to="/hackathons" className="btn-primary px-8 py-4 text-[10px] uppercase tracking-widest">
+            Acessar Eventos
+          </Link>
+          <Link to="/" className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-light)] hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-all">
+            Voltar ao Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] p-12">

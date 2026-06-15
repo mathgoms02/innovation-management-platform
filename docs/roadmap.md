@@ -37,8 +37,8 @@ Este documento contém o planejamento estratégico completo do projeto, servindo
 ### Sprint 8: Dashboard Dinâmica & Dados Reais (Concluída)
 - **Objetivo:** Substituir mocks por métricas reais, gráficos dinâmicos e sistema de anúncios.
 
-### Sprint 9: O Papel do Organizador e Refinamentos (Pendente)
+### Sprint 9: O Papel do Organizador e Refinamentos (Concluída)
 - **Objetivo:** Expandir RBAC para suportar o papel de `ORGANIZER`.
 
-### Sprint 10: Dinâmica de Equipes e Descoberta (Pendente)
+### Sprint 10: Dinâmica de Equipes e Descoberta (A Iniciar)
 - **Objetivo:** Busca autocomplete e fluxos complexos de formação de times.
