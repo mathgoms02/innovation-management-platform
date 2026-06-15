@@ -1,13 +1,28 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from apps.monitoring.services import log_action
+from ipware import get_client_ip
 
 User = get_user_model()
 
-from apps.monitoring.services import log_action
-from ipware import get_client_ip
-from rest_framework_simplejwt.tokens import RefreshToken
+class AuditLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            username = request.data.get('username')
+            try:
+                user = User.objects.get(username=username)
+                ip, _ = get_client_ip(request)
+                log_action(user, 'LOGIN', user, ip_address=ip)
+            except User.DoesNotExist:
+                pass
+        return response
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -22,7 +37,7 @@ class RegisterView(generics.CreateAPIView):
         # Automatic Login: Generate tokens
         refresh = RefreshToken.for_user(user)
         
-        # Auditoria de Cadastro (que também é um login inicial)
+        # Auditoria
         ip, _ = get_client_ip(request)
         log_action(user, 'CREATE', user, ip_address=ip)
         log_action(user, 'LOGIN', user, ip_address=ip)
