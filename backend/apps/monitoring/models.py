@@ -29,3 +29,22 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.action} - {self.resource_type} ({self.timestamp})"
+
+class Announcement(models.Model):
+    class Type(models.TextChoices):
+        INFO = 'INFO', 'Informação'
+        WARNING = 'WARNING', 'Alerta'
+        SUCCESS = 'SUCCESS', 'Sucesso'
+        URGENT = 'URGENT', 'Urgente'
+
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    type = models.CharField(max_length=20, choices=Type.choices, default=Type.INFO)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
