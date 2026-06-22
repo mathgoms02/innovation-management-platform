@@ -49,6 +49,30 @@ class RegisterView(generics.CreateAPIView):
             "access": str(refresh.access_token),
         }, status=status.HTTP_201_CREATED, headers=headers)
 
+class IsAdminOrOrganizer(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role in ['ADMIN', 'ORGANIZER']
+        )
+
+
+class UserListView(generics.ListAPIView):
+    """Lista usuários (opcionalmente filtrados por papel) para Admin/Organizador.
+
+    Usado pelo cockpit do organizador para designar jurados.
+    """
+    permission_classes = (IsAdminOrOrganizer,)
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        queryset = User.objects.filter(is_active=True).order_by('username')
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role.upper())
+        return queryset
+
+
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserSerializer
