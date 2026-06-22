@@ -32,8 +32,76 @@
   }
 
   .input-field {
-    @apply w-full p-3 bg-background border border-white/10 rounded-custom 
-           text-white focus:outline-none focus:border-brand-primary 
+    @apply w-full p-3 bg-background border border-white/10 rounded-custom
+           text-white focus:outline-none focus:border-brand-primary
            focus:ring-1 focus:ring-brand-primary transition-all duration-fast;
+  }
+
+  /* Cyberpunk dev backdrop: faint blueprint grid + radial vignette + top glow.
+     Aplicado no container raiz do AppLayout. */
+  .cyber-grid {
+    position: relative;
+    background-color: var(--color-bg);
+    background-image:
+      linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .cyber-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 60% at 50% -10%, rgba(0, 240, 255, 0.08), transparent 60%),
+      radial-gradient(80% 50% at 100% 110%, rgba(255, 0, 122, 0.06), transparent 60%);
+  }
+
+  /* Borda com gradiente neon animado (uso pontual em destaques). */
+  .gradient-border {
+    position: relative;
+    background:
+      linear-gradient(var(--color-bg-secondary), var(--color-bg-secondary)) padding-box,
+      linear-gradient(120deg, var(--color-primary), var(--color-secondary), var(--color-primary)) border-box;
+    border: 1px solid transparent;
+    background-size: 100% 100%, 200% 200%;
+    animation: border-pan 6s linear infinite;
+  }
+}
+
+@layer utilities {
+  @keyframes border-pan {
+    0% { background-position: 0 0, 0% 50%; }
+    100% { background-position: 0 0, 200% 50%; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animation-fade-in {
+    animation: fade-in 0.4s ease-out both;
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .animation-slide-up {
+    animation: slide-up 0.3s ease-out both;
+  }
+
+  /* Scrollbar fina e temática */
+  .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.15);
+    border-radius: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 240, 255, 0.3);
   }
 }
