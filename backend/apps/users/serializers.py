@@ -23,7 +23,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'role', 'has_accepted_terms')
+        # `role` é intencionalmente omitido: auto-cadastro é sempre PARTICIPANT.
+        # Papéis privilegiados (JUDGE/ORGANIZER/ADMIN) são atribuídos por
+        # Admin/Organizador, nunca escolhidos pelo próprio usuário.
+        fields = ('username', 'email', 'password', 'has_accepted_terms')
 
     def validate_has_accepted_terms(self, value):
         if not value:
@@ -35,7 +38,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],
-            role=validated_data.get('role', User.Role.PARTICIPANT),
+            role=User.Role.PARTICIPANT,
             has_accepted_terms=validated_data['has_accepted_terms']
         )
         return user

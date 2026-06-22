@@ -42,6 +42,13 @@ class Announcement(models.Model):
     type = models.CharField(max_length=20, choices=Type.choices, default=Type.INFO)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='announcements'
+    )
 
     class Meta:
         ordering = ['-created_at']

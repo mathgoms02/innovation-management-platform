@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Hackathons from './pages/Hackathons';
 import Submissions from './pages/Submissions';
+import Teams from './pages/Teams';
+import Manage from './pages/Manage';
 import Ranking from './pages/Ranking';
 import JudgeDashboard from './pages/JudgeDashboard';
 import EvaluateSubmission from './pages/EvaluateSubmission';
@@ -51,6 +53,22 @@ function App() {
               element={
                 <PrivateRoute>
                   <Submissions />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/teams"
+              element={
+                <PrivateRoute>
+                  <Teams />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage"
+              element={
+                <PrivateRoute>
+                  <Manage />
                 </PrivateRoute>
               }
             />

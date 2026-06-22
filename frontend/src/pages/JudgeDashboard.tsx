@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getSubmissionsByHackathon } from '../services/submission';
 import type { Submission } from '../services/submission';
+import AppLayout from '../components/AppLayout';
 import { ClipboardCheck, ExternalLink, Play } from 'lucide-react';
 
 const JudgeDashboard: React.FC = () => {
@@ -24,11 +25,16 @@ const JudgeDashboard: React.FC = () => {
     fetchSubmissions();
   }, [hackathonId]);
 
-  if (loading) return <div className="p-8 text-center text-white">Carregando submissões...</div>;
+  if (loading)
+    return (
+      <AppLayout>
+        <div className="p-8 text-center text-white">Carregando submissões...</div>
+      </AppLayout>
+    );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-8">
-      <div className="max-w-6xl mx-auto">
+    <AppLayout>
+      <div className="max-w-6xl mx-auto p-8 lg:p-12">
         <header className="mb-12 flex justify-between items-end">
           <div>
             <p className="text-[var(--color-primary)] font-black text-xs uppercase tracking-[0.3em] mb-2">Evaluation_Center</p>
@@ -99,7 +105,7 @@ const JudgeDashboard: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

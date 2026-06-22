@@ -4,7 +4,7 @@ from .models import Criterion, Evaluation, Score
 class CriterionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Criterion
-        fields = ['id', 'name', 'weight']
+        fields = ['id', 'hackathon', 'name', 'weight']
 
 class ScoreSerializer(serializers.ModelSerializer):
     criterion_name = serializers.ReadOnlyField(source='criterion.name')

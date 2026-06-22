@@ -33,3 +33,40 @@ class TeamMember(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.team.name}"
+
+class TeamJoinRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pendente'
+        APPROVED = 'APPROVED', 'Aprovado'
+        REJECTED = 'REJECTED', 'Rejeitado'
+
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name='join_requests'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='join_requests'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['team', 'user'],
+                condition=models.Q(status='PENDING'),
+                name='unique_pending_join_request'
+            )
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.team.name} ({self.status})"

@@ -9,7 +9,6 @@ const Register: React.FC = () => {
     username: '',
     email: '',
     password: '',
-    role: 'PARTICIPANT',
     has_accepted_terms: false,
   });
   const { showToast } = useToast();
@@ -102,14 +101,13 @@ const Register: React.FC = () => {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)]">Access_Role</label>
-              <select
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="input-field py-2 text-sm appearance-none cursor-pointer"
-              >
-                <option value="PARTICIPANT">PARTICIPANTE</option>
-                <option value="JUDGE">JURADO</option>
-              </select>
+              <div className="input-field py-2 text-sm flex items-center justify-between cursor-not-allowed opacity-80">
+                <span className="uppercase tracking-widest">Participante</span>
+                <span className="text-[8px] font-black text-[var(--text-light)] uppercase tracking-[0.2em]">Padrão</span>
+              </div>
+              <p className="text-[8px] text-[var(--text-light)] uppercase tracking-widest leading-relaxed">
+                Papéis de Jurado/Organizador são concedidos pela administração.
+              </p>
             </div>
 
             <div className="flex items-center gap-3 mt-4 mb-4">

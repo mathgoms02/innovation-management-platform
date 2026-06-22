@@ -21,6 +21,40 @@ class AuthTests(APITestCase):
         self.assertEqual(User.objects.count(), 1)
         self.assertEqual(User.objects.get().username, 'testuser')
 
+    def test_register_ignores_privileged_role(self):
+        """Auto-cadastro nunca cria papéis privilegiados, mesmo se enviados."""
+        url = reverse('register')
+        for sent_role in ['JUDGE', 'ADMIN', 'ORGANIZER']:
+            data = {
+                'username': f'user_{sent_role}',
+                'password': 'testpassword123',
+                'email': f'{sent_role}@example.com',
+                'role': sent_role,
+                'has_accepted_terms': True
+            }
+            response = self.client.post(url, data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            created = User.objects.get(username=f'user_{sent_role}')
+            self.assertEqual(created.role, 'PARTICIPANT')
+
+    def test_user_list_requires_privileged_role(self):
+        participant = User.objects.create_user(username='p1', password='pw', role='PARTICIPANT')
+        organizer = User.objects.create_user(username='o1', password='pw', role='ORGANIZER')
+        User.objects.create_user(username='judge1', password='pw', role='JUDGE')
+        url = reverse('user_list')
+
+        # Participante é barrado
+        self.client.force_authenticate(user=participant)
+        self.assertEqual(self.client.get(url).status_code, status.HTTP_403_FORBIDDEN)
+
+        # Organizador pode listar e filtrar por papel
+        self.client.force_authenticate(user=organizer)
+        response = self.client.get(url, {'role': 'JUDGE'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        usernames = [u['username'] for u in response.data]
+        self.assertIn('judge1', usernames)
+        self.assertNotIn('p1', usernames)
+
     def test_login_user(self):
         # First register
         user = User.objects.create_user(username='testuser', password='testpassword123')

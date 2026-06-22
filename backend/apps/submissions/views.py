@@ -1,5 +1,6 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from .models import Submission
 from .serializers import SubmissionSerializer
 from .services import SubmissionService
@@ -24,19 +25,21 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(team__members=user).distinct()
 
     def create(self, request, *args, **kwargs):
-        team_id = request.data.get('team')
+        # Valida formato/obrigatoriedade dos campos via serializer.
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        team = serializer.validated_data['team']
+
         try:
-            team = Team.objects.get(id=team_id)
             submission = SubmissionService.create_or_update_submission(
                 team=team,
                 user=request.user,
-                data=request.data
+                data=serializer.validated_data
             )
-            serializer = self.get_serializer(submission)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Team.DoesNotExist:
-            return Response({"detail": "Equipe não encontrada."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            # Handle list of errors if it's a ValidationError
-            detail = getattr(e, 'detail', str(e))
-            return Response({"detail": detail}, status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as e:
+            return Response({"detail": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            self.get_serializer(submission).data,
+            status=status.HTTP_201_CREATED
+        )

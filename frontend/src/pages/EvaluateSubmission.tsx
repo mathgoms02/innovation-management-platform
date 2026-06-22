@@ -4,6 +4,7 @@ import { evaluationService } from '../services/evaluation';
 import type { Criterion, EvaluationInput } from '../services/evaluation';
 import { getSubmissionById } from '../services/submission';
 import type { Submission } from '../services/submission';
+import AppLayout from '../components/AppLayout';
 import { Save, AlertCircle } from 'lucide-react';
 
 const EvaluateSubmission: React.FC = () => {
@@ -39,10 +40,6 @@ const EvaluateSubmission: React.FC = () => {
     fetchData();
   }, [submissionId]);
 
-  // I need to update the backend to include hackathon_id in SubmissionSerializer.
-  // I'll do that in the next step.
-  // For now, let's continue with the UI logic.
-
   const handleScoreChange = (criterionId: number, value: number) => {
     setScores(prev => ({ ...prev, [criterionId]: value }));
   };
@@ -65,8 +62,6 @@ const EvaluateSubmission: React.FC = () => {
       };
 
       await evaluationService.createEvaluation(evaluationData);
-      // Success! Navigate back to judge dashboard.
-      // But we need hackathonId to navigate back.
       navigate(-1);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao salvar avaliação.');
@@ -75,12 +70,22 @@ const EvaluateSubmission: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-white uppercase tracking-widest">Iniciando Protocolo de Avaliação...</div>;
-  if (!submission) return <div className="p-8 text-center text-red-500">Submissão não encontrada.</div>;
+  if (loading)
+    return (
+      <AppLayout>
+        <div className="p-8 text-center text-white uppercase tracking-widest">Iniciando Protocolo de Avaliação...</div>
+      </AppLayout>
+    );
+  if (!submission)
+    return (
+      <AppLayout>
+        <div className="p-8 text-center text-red-500">Submissão não encontrada.</div>
+      </AppLayout>
+    );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-8">
-      <div className="max-w-3xl mx-auto">
+    <AppLayout>
+      <div className="max-w-3xl mx-auto p-8 lg:p-12">
         <header className="mb-12 flex justify-between items-end">
           <div className="flex-1">
             <p className="text-[var(--color-primary)] font-black text-[10px] uppercase tracking-[0.4em] mb-2">Evaluation_In_Progress</p>
@@ -113,13 +118,13 @@ const EvaluateSubmission: React.FC = () => {
                   </span>
                 </div>
                 
-                <div className="flex gap-2 justify-between">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                <div className="flex gap-2 justify-between flex-wrap">
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <button
                       key={num}
                       type="button"
                       onClick={() => handleScoreChange(criterion.id, num)}
-                      className={`w-10 h-10 rounded-lg font-black text-xs transition-all ${
+                      className={`w-9 h-9 rounded-lg font-black text-xs transition-all ${
                         scores[criterion.id] === num
                           ? 'bg-[var(--color-primary)] text-black scale-110 shadow-[0_0_15px_rgba(0,240,255,0.5)]'
                           : 'bg-white/5 text-[var(--text-light)] hover:bg-white/10'
@@ -157,7 +162,7 @@ const EvaluateSubmission: React.FC = () => {
           </button>
         </form>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

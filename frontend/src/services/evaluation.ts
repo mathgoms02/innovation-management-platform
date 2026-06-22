@@ -45,6 +45,19 @@ export const evaluationService = {
     return response.data;
   },
 
+  createCriterion: async (hackathonId: number, name: string, weight: number) => {
+    const response = await api.post<Criterion>('/evaluations/criteria/', {
+      hackathon: hackathonId,
+      name,
+      weight,
+    });
+    return response.data;
+  },
+
+  deleteCriterion: async (id: number) => {
+    await api.delete(`/evaluations/criteria/${id}/`);
+  },
+
   createEvaluation: async (data: EvaluationInput) => {
     const response = await api.post<Evaluation>('/evaluations/evaluations/', data);
     return response.data;

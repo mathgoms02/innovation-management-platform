@@ -42,6 +42,11 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     serializer_class = AnnouncementSerializer
     permission_classes = [IsAdminOrOrganizerOrReadOnly]
 
+    def perform_create(self, serializer):
+        from .services import send_global_notification
+        announcement = serializer.save(created_by=self.request.user)
+        send_global_notification(f"📢 {announcement.title}")
+
 class UserStatsView(APIView):
     permission_classes = [IsAuthenticated]
 

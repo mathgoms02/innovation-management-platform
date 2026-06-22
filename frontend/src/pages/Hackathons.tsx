@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { Search, Filter } from 'lucide-react';
 import { Skeleton } from '../components/Skeleton';
+import AppLayout from '../components/AppLayout';
 
 const Hackathons: React.FC = () => {
   const { user } = useAuth();
@@ -50,13 +51,10 @@ const Hackathons: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--color-bg)] p-8">
-        <div className="max-w-6xl mx-auto">
+      <AppLayout>
+        <div className="p-8 lg:p-12">
           <header className="flex justify-between items-center mb-12">
             <h1 className="text-4xl tracking-tight text-white">Hackathons</h1>
-            <Link to="/" className="text-[var(--color-primary)] hover:underline font-medium">
-              ← Voltar ao Dashboard
-            </Link>
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -79,20 +77,17 @@ const Hackathons: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-8">
-      <div className="max-w-6xl mx-auto">
+    <AppLayout>
+      <div className="p-8 lg:p-12">
         <header className="flex justify-between items-center mb-12">
           <h1 className="text-4xl tracking-tight uppercase italic font-black">
             System_<span className="text-[var(--color-primary)]">Events</span>
           </h1>
-          <Link to="/" className="text-xs font-black text-[var(--color-primary)] hover:underline uppercase tracking-widest">
-            ← Back_to_Terminal
-          </Link>
         </header>
 
         {/* Filters Bar */}
@@ -177,7 +172,7 @@ const Hackathons: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

@@ -6,6 +6,7 @@ import SubmissionForm from '../features/submissions/SubmissionForm';
 import { LayoutDashboard, Send, Clock, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
+import AppLayout from '../components/AppLayout';
 
 const Submissions: React.FC = () => {
   const { user } = useAuth();
@@ -36,32 +37,36 @@ const Submissions: React.FC = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div className="p-12 text-center text-white/50 font-black uppercase tracking-widest">Sincronizando...</div>;
+  if (loading)
+    return (
+      <AppLayout>
+        <div className="p-12 text-center text-white/50 font-black uppercase tracking-widest">Sincronizando...</div>
+      </AppLayout>
+    );
 
   if (user?.role === 'JUDGE' || user?.role === 'ORGANIZER') {
     return (
-      <div className="min-h-screen bg-[var(--color-bg)] p-12 flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic mb-4">
-          Acesso_<span className="text-[var(--color-primary)]">View-Only</span>
-        </h1>
-        <p className="text-[10px] text-[var(--text-light)] uppercase tracking-[0.3em] mb-8 max-w-md">
-          Como {user.role}, o envio de projetos é restrito a Participantes. Seu papel é estritamente focado em visualização e avaliação.
-        </p>
-        <div className="flex gap-4">
-          <Link to="/hackathons" className="btn-primary px-8 py-4 text-[10px] uppercase tracking-widest">
-            Acessar Eventos
-          </Link>
-          <Link to="/" className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-light)] hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-all">
-            Voltar ao Dashboard
-          </Link>
+      <AppLayout>
+        <div className="p-12 flex flex-col items-center justify-center text-center min-h-[70vh]">
+          <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic mb-4">
+            Acesso_<span className="text-[var(--color-primary)]">View-Only</span>
+          </h1>
+          <p className="text-[10px] text-[var(--text-light)] uppercase tracking-[0.3em] mb-8 max-w-md">
+            Como {user.role}, o envio de projetos é restrito a Participantes. Seu papel é estritamente focado em visualização e avaliação.
+          </p>
+          <div className="flex gap-4">
+            <Link to="/hackathons" className="btn-primary px-8 py-4 text-[10px] uppercase tracking-widest">
+              Acessar Eventos
+            </Link>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-12">
-      <div className="max-w-6xl mx-auto">
+    <AppLayout>
+      <div className="p-8 lg:p-12">
         <header className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">
@@ -69,9 +74,6 @@ const Submissions: React.FC = () => {
             </h1>
             <p className="text-[10px] text-[var(--text-light)] uppercase tracking-[0.3em] mt-2">Gestão de entregas por equipe</p>
           </div>
-          <Link to="/" className="text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)] hover:underline border border-[var(--color-primary)]/20 px-4 py-2 rounded-lg">
-            ← Voltar_Terminal
-          </Link>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -154,7 +156,7 @@ const Submissions: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
