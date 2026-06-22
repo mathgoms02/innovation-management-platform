@@ -11,9 +11,20 @@ class IsAdminOrOrganizerOrReadOnly(permissions.BasePermission):
             return True
         if request.user.role == 'ADMIN':
             return True
-        # Se for ORGANIZER, só pode editar se for o organizador que criou (se aplicável)
+        # ORGANIZER só pode editar objetos que lhe pertencem. A "posse" é
+        # resolvida por owner direto (organizer/created_by) ou herdada do
+        # hackathon ao qual o objeto pertence (ex.: Criterion).
         if request.user.role == 'ORGANIZER':
-            if hasattr(obj, 'organizer'):
-                return obj.organizer == request.user
-            return True # Allow organizer to edit global objects like Announcements for now
+            return self._owns(obj, request.user)
+        return False
+
+    @staticmethod
+    def _owns(obj, user):
+        owner = getattr(obj, 'organizer', None) or getattr(obj, 'created_by', None)
+        if owner is not None:
+            return owner == user
+        hackathon = getattr(obj, 'hackathon', None)
+        if hackathon is not None:
+            return hackathon.organizer == user
+        # Objeto sem dono identificável: nega para ORGANIZER (apenas ADMIN passa).
         return False
