@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { useToast } from '../components/Toast';
 import api from '../services/api';
+import AppLayout from '../components/AppLayout';
 import { User as UserIcon, Shield, Palette, Trash2, AlertTriangle, Save, Camera } from 'lucide-react';
 
 const Settings: React.FC = () => {
@@ -50,8 +51,8 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-8 md:p-12">
-      <div className="max-w-6xl mx-auto">
+    <AppLayout>
+      <div className="p-8 lg:p-12">
         <header className="mb-12 flex justify-between items-center">
           <div>
             <p className="text-[var(--color-primary)] font-black text-[10px] uppercase tracking-[0.4em] mb-2">System_Configuration</p>
@@ -59,12 +60,6 @@ const Settings: React.FC = () => {
               SETTINGS_<span className="text-[var(--color-primary)]">CORE</span>
             </h1>
           </div>
-          <button 
-            onClick={() => navigate('/')}
-            className="text-[10px] font-black text-[var(--text-light)] hover:text-white uppercase tracking-widest border border-white/10 px-6 py-3 rounded-lg hover:bg-white/5 transition-all"
-          >
-            ← BACK_TO_DASHBOARD
-          </button>
         </header>
 
         {/* Main Grid Layout */}
@@ -237,7 +232,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </AppLayout>
   );
 };
 

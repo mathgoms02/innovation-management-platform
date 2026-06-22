@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { evaluationService } from '../services/evaluation';
 import type { RankingEntry } from '../services/evaluation';
+import AppLayout from '../components/AppLayout';
 import { Trophy, Medal, Award, Download } from 'lucide-react';
 
 const Ranking: React.FC = () => {
@@ -49,11 +50,17 @@ const Ranking: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  if (loading) return <div className="p-8 text-center text-white">Carregando classificação...</div>;
+  if (loading)
+    return (
+      <AppLayout>
+        <div className="p-8 text-center text-white">Carregando classificação...</div>
+      </AppLayout>
+    );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-8">
-      <div className="max-w-4xl mx-auto">
+    <AppLayout>
+      <div className="p-8 lg:p-12">
+        <div className="max-w-4xl mx-auto">
         <header className="mb-12 flex justify-between items-end">
           <div>
             <p className="text-[var(--color-primary)] font-black text-xs uppercase tracking-[0.3em] mb-2">Leaderboard</p>
@@ -122,7 +129,8 @@ const Ranking: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
