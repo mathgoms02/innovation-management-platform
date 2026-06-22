@@ -44,8 +44,10 @@ Plataforma completa para gestão de Hackathons, integrando participantes, jurado
 - **Permissions:** `IsAdminOrOrganizerOrReadOnly` resolve a posse do objeto via helper `_owns`, que aceita `obj.organizer`, `obj.created_by` (ex.: `Announcement`) ou `obj.hackathon.organizer` (ex.: `Criterion`). `ADMIN` faz bypass. Equipes usam `IsTeamLeaderOrReadOnly` (apenas líder/ADMIN edita ou desfaz).
 - **Team membership:** Solicitações de entrada (`TeamJoinRequest`) são aprovadas/rejeitadas pelo líder; o membro pode sair (líder não), e o líder pode remover membros. Regra de uma liderança por hackathon aplicada no `TeamService`.
 - **Judge assignment:** Acesso ao painel de avaliação restrito a jurados (`JUDGE`) vinculados especificamente ao hackathon. O painel de submissão do participante é bloqueado (View-Only) para `JUDGE` e `ORGANIZER`.
-- **LGPD Deletion:** O método `delete` no `UserDetailView` não remove o registro físico, mas sim anonimiza PII (Personal Identifiable Information), alterando e-mail, nomes e ofuscando a senha.
+- **LGPD Deletion:** O método `delete` no `UserDetailView` não remove o registro físico, mas sim anonimiza PII (Personal Identifiable Information), alterando e-mail, nomes e ofuscando a senha. O arquivo de avatar é deletado do storage.
+- **Avatar Upload:** Endpoint dedicado `POST/DELETE /api/users/me/avatar/` com validação de tipo (JPEG, PNG, GIF, WebP) e tamanho (máx 5 MB). Arquivos servidos via `MEDIA_URL` em dev; o `UserSerializer` retorna a URL absoluta via `SerializerMethodField`. Upload e remoção registram audit log.
 - **JWT no frontend:** `services/api.ts` injeta o access token e possui interceptor de resposta que renova via `/users/token/refresh/` em caso de 401, enfileirando requests concorrentes; ao falhar, encerra a sessão e redireciona ao login.
+- **AuthContext `updateUser`:** Além de `login` e `logout`, o contexto expõe `updateUser(Partial<User>)` que mescla dados parciais ao estado do usuário — usado após upload de avatar e edição de perfil para refletir mudanças sem reload.
 
 ---
 

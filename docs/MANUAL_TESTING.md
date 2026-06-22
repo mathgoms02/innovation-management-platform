@@ -70,10 +70,23 @@ Este guia descreve como testar todas as funcionalidades da plataforma, do backen
 
 ---
 
+## 5.5. Fluxo de Teste: Foto de Perfil (Avatar)
+
+1. **Upload:** em **Settings → User_Profile**, clique no ícone de câmera sobre o avatar. Selecione uma imagem (JPEG, PNG, GIF ou WebP, até 5 MB).
+2. **Preview Instantâneo:** confirme que o avatar na página de Settings e na topbar (canto superior direito) atualizam imediatamente, sem reload.
+3. **Validação Client-Side:** tente enviar um arquivo maior que 5 MB — deve aparecer toast de erro `FILE_OVERFLOW`.
+4. **Validação Server-Side:** via cURL/Postman, envie um arquivo `.txt` renomeado — o backend deve rejeitar com HTTP 400.
+5. **Remoção:** passe o mouse sobre o avatar e clique no botão X (vermelho). Confirme que o avatar volta a exibir as iniciais do username.
+6. **Persistência:** faça logout e login novamente. O avatar salvo deve ser carregado corretamente.
+
+---
+
 ## 6. Comandos de Diagnóstico (Dica)
 
 - **Logs de Auditoria:** `GET /api/monitoring/logs/` (apenas Admin).
 - **Health Check:** `GET /api/monitoring/health/`.
 - **Usuários por papel:** `GET /api/users/?role=JUDGE` (Admin/Organizador).
+- **Avatar Upload:** `POST /api/users/me/avatar/` (multipart/form-data, campo `avatar`).
+- **Avatar Remoção:** `DELETE /api/users/me/avatar/`.
 - **Smoke Test Automático:** `python smoke_test.py` dentro da pasta `backend`.
 - **Sessão JWT:** o frontend renova o access token automaticamente em respostas 401; se a renovação falhar, você é redirecionado ao login.

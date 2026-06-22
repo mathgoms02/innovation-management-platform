@@ -1,5 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -44,7 +46,7 @@ class RegisterView(generics.CreateAPIView):
 
         headers = self.get_success_headers(serializer.data)
         return Response({
-            "user": UserSerializer(user).data,
+            "user": UserSerializer(user, context={'request': request}).data,
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }, status=status.HTTP_201_CREATED, headers=headers)
@@ -95,3 +97,57 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
             user.avatar.delete(save=False)
         user.save()
         return Response(status=204)
+
+
+class AvatarUploadView(APIView):
+    """Upload ou remoção do avatar do usuário autenticado."""
+    permission_classes = (permissions.IsAuthenticated,)
+    parser_classes = (MultiPartParser, FormParser)
+
+    ALLOWED_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+    MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+
+    def post(self, request):
+        avatar = request.FILES.get('avatar')
+        if not avatar:
+            return Response(
+                {'detail': 'Nenhum arquivo enviado.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if avatar.content_type not in self.ALLOWED_TYPES:
+            return Response(
+                {'detail': 'Formato não suportado. Use JPEG, PNG, GIF ou WebP.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if avatar.size > self.MAX_SIZE:
+            return Response(
+                {'detail': 'Arquivo excede o limite de 5 MB.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = request.user
+        # Remove old avatar file if it exists
+        if user.avatar:
+            user.avatar.delete(save=False)
+
+        user.avatar = avatar
+        user.save(update_fields=['avatar'])
+
+        ip, _ = get_client_ip(request)
+        log_action(user, 'UPDATE', user, ip_address=ip)
+
+        serializer = UserSerializer(user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        user = request.user
+        if user.avatar:
+            user.avatar.delete(save=False)
+            user.avatar = None
+            user.save(update_fields=['avatar'])
+
+            ip, _ = get_client_ip(request)
+            log_action(user, 'UPDATE', user, ip_address=ip)
+
+        serializer = UserSerializer(user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

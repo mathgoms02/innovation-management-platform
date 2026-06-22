@@ -14,3 +14,6 @@ instructions/
 # Logs
 backend/logs/
 *.log
+
+# Upload Medias
+media/
