@@ -237,9 +237,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   </p>
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] p-[1px] group-hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all">
-                  <div className="w-full h-full rounded-lg bg-[var(--color-bg-secondary)] flex items-center justify-center font-black text-xs">
-                    {user?.username?.substring(0, 2).toUpperCase()}
-                  </div>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.username}
+                      className="w-full h-full rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-lg bg-[var(--color-bg-secondary)] flex items-center justify-center font-black text-xs">
+                      {user?.username?.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
               </div>
 

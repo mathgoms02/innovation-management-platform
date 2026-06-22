@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { useToast } from '../components/Toast';
+import { uploadAvatar, deleteAvatar } from '../services/user';
 import api from '../services/api';
 import AppLayout from '../components/AppLayout';
-import { User as UserIcon, Shield, Palette, Trash2, AlertTriangle, Save, Camera } from 'lucide-react';
+import { User as UserIcon, Shield, Palette, Trash2, AlertTriangle, Save, Camera, X, Loader2 } from 'lucide-react';
 
 const Settings: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -20,12 +21,59 @@ const Settings: React.FC = () => {
   const [showDeleteModal, setShowUserDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('error', 'FILE_OVERFLOW // LIMITE_5MB_EXCEDIDO');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      showToast('error', 'INVALID_FORMAT // APENAS_IMAGENS');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const data = await uploadAvatar(file);
+      updateUser(data);
+      showToast('success', 'AVATAR_SYNCED // IMAGEM_ATUALIZADA');
+    } catch {
+      showToast('error', 'UPLOAD_FAILED // ERRO_NO_ENVIO');
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    setUploadingAvatar(true);
+    try {
+      const data = await deleteAvatar();
+      updateUser(data);
+      showToast('success', 'AVATAR_REMOVED // IMAGEM_DELETADA');
+    } catch {
+      showToast('error', 'REMOVE_FAILED // ERRO_NA_REMOÇÃO');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.patch('/users/me/', formData);
+      const response = await api.patch('/users/me/', formData);
+      updateUser(response.data);
       showToast('success', 'PROFILE_UPDATED // DADOS_SINCRONIZADOS');
     } catch (err: any) {
       showToast('error', 'SYNC_ERROR // FALHA_NA_ATUALIZAÇÃO');
@@ -108,13 +156,45 @@ const Settings: React.FC = () => {
                 <div className="flex items-center gap-8">
                   <div className="relative group">
                     <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] p-[2px] shadow-2xl transition-all group-hover:shadow-[0_0_30px_rgba(0,240,255,0.3)]">
-                       <div className="w-full h-full rounded-[22px] bg-[var(--color-bg-secondary)] flex items-center justify-center text-4xl font-black text-white italic">
-                         {user?.username?.substring(0, 2).toUpperCase()}
-                       </div>
+                       {user?.avatar ? (
+                         <img
+                           src={user.avatar}
+                           alt={user.username}
+                           className="w-full h-full rounded-[22px] object-cover"
+                         />
+                       ) : (
+                         <div className="w-full h-full rounded-[22px] bg-[var(--color-bg-secondary)] flex items-center justify-center text-4xl font-black text-white italic">
+                           {user?.username?.substring(0, 2).toUpperCase()}
+                         </div>
+                       )}
                     </div>
-                    <button className="absolute bottom-2 right-2 bg-[var(--color-secondary)] text-white p-2 rounded-xl shadow-lg hover:scale-110 transition-transform">
+                    {uploadingAvatar && (
+                      <div className="absolute inset-0 rounded-3xl bg-black/60 flex items-center justify-center">
+                        <Loader2 size={32} className="text-[var(--color-primary)] animate-spin" />
+                      </div>
+                    )}
+                    <button
+                      onClick={handleAvatarClick}
+                      disabled={uploadingAvatar}
+                      className="absolute bottom-2 right-2 bg-[var(--color-secondary)] text-white p-2 rounded-xl shadow-lg hover:scale-110 transition-transform disabled:opacity-50"
+                    >
                       <Camera size={16} />
                     </button>
+                    {user?.avatar && !uploadingAvatar && (
+                      <button
+                        onClick={handleAvatarRemove}
+                        className="absolute top-2 right-2 bg-red-500/80 text-white p-1.5 rounded-lg shadow-lg hover:bg-red-500 hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{user?.username}</h3>
