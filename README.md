@@ -15,13 +15,14 @@ Uma plataforma moderna e escalável para gestão de Hackathons, times e submiss�
 
 ## ✨ Funcionalidades Principais
 
-- **Gestão de Hackathons:** Fluxo completo de criação e gestão de eventos, descentralizado através do papel de Organizador.
-- **Sistema de Equipes:** Formação de times e submissão de projetos com controle de prazos.
-- **Painel do Jurado:** Interface dedicada para avaliação baseada em critérios ponderados.
+- **Cockpit do Organizador (`/manage`):** Interface para ADMIN/ORGANIZER criar e editar hackathons, gerenciar critérios e pesos, designar jurados e publicar anúncios — tudo pela UI (sem depender do Django Admin).
+- **Sistema de Equipes:** Formação de times com regra de uma liderança por evento, fluxo de **solicitação de entrada** com aprovação do líder, edição pelo líder e submissão de projetos com controle de prazos.
+- **Painel do Jurado:** Interface dedicada para avaliação baseada em critérios ponderados (escala 0–10).
 - **Ranking Dinâmico:** Cálculo automático de notas e exportação de resultados em CSV.
+- **Navegação Unificada:** `AppLayout` compartilhado (sidebar sensível ao papel + topbar com busca de hackathons, notificações e menu de usuário) em todas as telas.
 - **Observabilidade:** Trilha de auditoria completa para ações administrativas e de jurados.
 - **Notificações:** Feedback em tempo real via WebSockets para eventos críticos.
-- **Privacidade (LGPD):** Fluxo de consentimento e funcionalidade de anonimização de dados (Account Deletion).
+- **Segurança & Privacidade (LGPD):** Auto-cadastro restrito ao papel `PARTICIPANT`, refresh automático de token JWT no frontend, e anonimização de dados na exclusão de conta.
 
 ## 🎨 Identidade Visual
 
@@ -44,7 +45,7 @@ Tema **Cyberpunk/Modern Dark**:
 2. `npm install`
 3. `npm run dev`
 
-## 📈 Roadmap (Sprint 6 Concluída)
+## 📈 Roadmap
 
 - [x] **Sprint 1:** Fundação (Auth & Custom User)
 - [x] **Sprint 2:** Domínio Core (Hackathons & Teams)
@@ -55,4 +56,6 @@ Tema **Cyberpunk/Modern Dark**:
 - [x] **Sprint 7:** UX Base, Settings e Retenção
 - [x] **Sprint 8:** Dashboard Dinâmica & Dados Reais
 - [x] **Sprint 9:** O Papel do Organizador e Refinamentos
-- [ ] **Sprint 10:** Dinâmica de Equipes e Descoberta
+- [x] **Sprint 10:** Dinâmica de Equipes e Descoberta (busca, solicitação de entrada, gestão de times)
+- [x] **Sprint 10.5:** Hardening de Segurança, Cockpit do Organizador e Refino de UI
+- [ ] **Sprint 11:** Production Readiness (Segurança, Arquitetura e Deploy)

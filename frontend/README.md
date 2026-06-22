@@ -1,73 +1,38 @@
-# React + TypeScript + Vite
+# Frontend — Innovation Management Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA em **React 19 + TypeScript + Vite** com Tailwind CSS, tema cyberpunk dark.
 
-Currently, two official plugins are available:
+## Comandos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `npm install` — instala dependências
+- `npm run dev` — servidor de desenvolvimento (Vite, porta padrão 5173)
+- `npm run build` — `tsc -b` + `vite build` (erros de tipo quebram o build)
+- `npm run lint` — ESLint
 
-## React Compiler
+Variáveis de ambiente (opcionais): `VITE_API_URL` (default `http://localhost:8000/api`)
+e `VITE_WS_URL` (default `ws://localhost:8000/ws/notifications/`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Estrutura
 
-## Expanding the ESLint configuration
+- `src/components/` — UI compartilhada. Destaque para **`AppLayout`** (sidebar
+  sensível ao papel + topbar com busca de hackathons, notificações e menu de
+  usuário). Envolva novas telas em `<AppLayout>` em vez de recriar o cabeçalho.
+  Também: `Toast`, `Skeleton`.
+- `src/features/` — lógica de domínio e Context API (`auth/AuthContext`,
+  `auth/NotificationContext`, `submissions/`).
+- `src/services/` — camada de API por domínio (`hackathon`, `team`, `submission`,
+  `evaluation`, `monitoring`, `user`) + `api.ts` (Axios com injeção de JWT e
+  interceptor de refresh de token em respostas 401).
+- `src/pages/` — telas de rota: `Login`, `Register`, `Dashboard`, `Hackathons`,
+  `Teams`, `Submissions`, `Manage` (cockpit do Organizador), `Ranking`,
+  `JudgeDashboard`, `EvaluateSubmission`, `Settings`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Convenções
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **CSS Grid** para layouts complexos (dashboards, cockpit, settings).
+- `import type` para interfaces TypeScript (Vite `verbatimModuleSyntax`).
+- Tema cyberpunk: fundo `#0b0c10`, acentos Cyan `#00f0ff` e Magenta `#ff007a`;
+  use `btn-primary`/`btn-secondary`, bordas neon em foco e a classe `cyber-grid`
+  (aplicada pelo `AppLayout`).
+- Validar permissões, status do evento e associação do usuário **no frontend e
+  na API** antes de qualquer CREATE/UPDATE/DELETE.
