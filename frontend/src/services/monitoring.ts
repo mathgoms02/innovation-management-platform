@@ -46,5 +46,13 @@ export const monitoringService = {
   getAnnouncements: async (): Promise<Announcement[]> => {
     const response = await api.get('/monitoring/announcements/');
     return response.data;
-  }
+  },
+  createAnnouncement: async (data: {
+    title: string;
+    content: string;
+    type: Announcement['type'];
+  }): Promise<Announcement> => {
+    const response = await api.post('/monitoring/announcements/', data);
+    return response.data;
+  },
 };
