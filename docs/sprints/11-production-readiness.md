@@ -19,7 +19,7 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 | # | Gap | Severidade |
 |---|-----|-----------|
 | 1 | WebSocket sem autenticação (`accept()` sem checar usuário; grupo global único) | 🔴 Crítico |
-| 2 | Sem `MEDIA_URL`/`MEDIA_ROOT` apesar de `ImageField` (avatar) | 🔴 Crítico |
+| 2 | ~~Sem `MEDIA_URL`/`MEDIA_ROOT` apesar de `ImageField` (avatar)~~ | ✅ Resolvido |
 | 3 | SQLite em uso; incompatível com múltiplos workers + Channels/Redis | 🔴 Crítico |
 | 4 | Sem headers de segurança (SSL redirect, HSTS, cookies secure) | 🔴 Crítico |
 | 5 | Sem throttling em login/registro (brute-force) | 🟠 Alto |
@@ -35,11 +35,11 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 - [x] **Autenticar WebSocket via JWT** — middleware de Channels que valida o token (query string `?token=`), popula `scope["user"]` e rejeita conexão anônima.
 - [x] **Headers de segurança condicionais a `DEBUG`** — `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_PROXY_SSL_HEADER`.
 - [ ] **Throttling DRF** (`ScopedRateThrottle`) em login e registro.
-- [ ] **Validação de upload** (tipo/tamanho/extensão) para avatar.
+- [x] **Validação de upload** (tipo/tamanho/extensão) para avatar — endpoint dedicado `POST/DELETE /api/users/me/avatar/` com validação de MIME type (JPEG, PNG, GIF, WebP) e tamanho (5 MB). Frontend exibe avatar real na Settings e topbar, com upload, preview e remoção.
 - [ ] **Notificações por usuário** — migrar do grupo global único para grupos `notifications_{user_id}`.
 
 ### Fase B — Lacunas Funcionais do Produto
-- [ ] Configurar MEDIA (object storage / `django-storages` em produção).
+- [x] Configurar MEDIA — `MEDIA_URL = '/media/'` e `MEDIA_ROOT = BASE_DIR / 'media'` adicionados ao `settings.py`; `core/urls.py` serve arquivos de media em `DEBUG`. `UserSerializer` retorna URL absoluta via `SerializerMethodField`. Para produção, migrar para object storage / `django-storages`.
 - [ ] Reset e troca de senha + verificação de e-mail (`EMAIL_BACKEND` via env).
 - [ ] Fechar escopo da Sprint 10 (dinâmica de equipes / descoberta).
 
