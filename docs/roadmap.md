@@ -46,5 +46,7 @@ Este documento contém o planejamento estratégico completo do projeto, servindo
 ### Sprint 10.5: Hardening, Cockpit do Organizador e Refino de UI (Concluída)
 - **Objetivo:** Sprint intermediária de auditoria — correção de escalonamento de privilégio no cadastro, refresh de token JWT, ownership de anúncios/critérios, página `/manage` (criar evento, critérios, jurados, anúncios), `AppLayout` compartilhado e polimento visual cyberpunk.
 
-### Sprint 11: Production Readiness (A Iniciar)
+### Sprint 11: Production Readiness (Em Andamento)
 - **Objetivo:** Levar a plataforma a "implantável em produção": PostgreSQL/Redis gerenciados, Docker/CI-CD, MEDIA/storage, throttling, notificações por usuário, testes de frontend e demais itens de `docs/sprints/11-production-readiness.md`.
+- **Concluído:** Fase A (WebSocket autenticado via JWT, security headers, throttling, notificações por usuário), Fase B (reset/troca de senha + verificação de e-mail), Fase C (service layer em `users`/`hackathons`, Error Boundary, testes de frontend com Vitest), Fase D (Docker/compose, CI GitHub Actions, banco via `DATABASE_URL`, whitenoise, `.env.example`).
+- **Pendente:** Provisionar Postgres/Redis gerenciados no ambiente real, `django-storages`/object storage para media, agregação de logs e backups (Fase E).

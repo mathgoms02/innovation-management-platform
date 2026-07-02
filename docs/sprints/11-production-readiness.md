@@ -7,7 +7,7 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 - Domínio completo: evento → equipes → submissão → avaliação ponderada → ranking.
 - Service Layer sólido em `evaluations`, `submissions`, `teams`, `monitoring`.
 - RBAC (4 papéis) com ownership por objeto, auditoria automática (`AuditMixin`), LGPD (anonimização), structlog.
-- Backend com 32 testes; frontend sem testes.
+- Backend com 39 testes; frontend com 11 testes (Vitest).
 
 > **Atualização pós Sprint 10.5:** parte do hardening foi antecipada. Já resolvidos:
 > escalonamento de privilégio no cadastro (auto-registro travado em `PARTICIPANT`),
@@ -44,16 +44,16 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 - [ ] Fechar escopo da Sprint 10 (dinâmica de equipes / descoberta).
 
 ### Fase C — Arquitetura & Qualidade
-- [ ] Extrair lógica de `users` e `hackathons` para `services.py`.
-- [ ] Testes no frontend (Vitest + Testing Library): Auth/Notification contexts e fluxos de submissão/avaliação.
-- [ ] Error Boundary + refresh-token interceptor em `services/api.ts`.
+- [x] Extrair lógica de `users` e `hackathons` para `services.py` (`UserService`, `HackathonService`); views agora finas.
+- [x] Testes no frontend (Vitest + Testing Library): `AuthContext`, `NotificationContext` e `ErrorBoundary` (11 testes). Script `npm test`.
+- [x] Error Boundary no frontend (fallback cyberpunk envolvendo o App). Refresh-token interceptor em `services/api.ts` já existia desde a Sprint 10.5.
 
 ### Fase D — Infraestrutura & Deploy
-- [ ] Migrar para PostgreSQL (env-driven via `dj-database-url`); Redis gerenciado.
-- [ ] `Dockerfile` (ASGI: Uvicorn/Gunicorn + Daphne) + `docker-compose` (web, db, redis, frontend).
-- [ ] `.env.example` documentado.
-- [ ] CI (GitHub Actions): lint + `manage.py test` + `npm run build` + smoke test.
-- [ ] Servir estáticos (whitenoise/CDN) + `collectstatic`; healthcheck `/api/monitoring/health/` no orquestrador.
+- [x] Banco env-driven via `DATABASE_URL` (`env.db()`, fallback SQLite). Provisionar Postgres/Redis gerenciados fica para o ambiente real.
+- [x] `backend/Dockerfile` (ASGI: gunicorn + uvicorn worker) com `entrypoint.sh` (migrate + collectstatic) + `frontend/Dockerfile` (build Vite → nginx) + `docker-compose.yml` (web, db, redis, frontend com healthchecks).
+- [x] `.env.example` documentado (backend e frontend).
+- [x] CI (GitHub Actions): `manage.py test` + `npm run lint`/`build`/`test` (lint não-bloqueante por débito pré-existente).
+- [x] Servir estáticos via whitenoise (`CompressedManifestStaticFilesStorage`) + `collectstatic` no entrypoint. Healthcheck `/api/monitoring/health/` disponível para o orquestrador.
 
 ### Fase E — Pós-Deploy
 - [ ] Centralizar logs JSON num agregador; alertas sobre audit trail; backup de DB.
