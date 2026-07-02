@@ -14,9 +14,31 @@ class MonitoringTests(APITestCase):
         self.assertEqual(response.data['services']['database'], 'up')
 
 class WebSocketTests(unittest.IsolatedAsyncioTestCase):
-    async def test_notification_websocket(self):
+    async def test_anonymous_connection_is_rejected(self):
+        """Sem token JWT, a conexão WebSocket deve ser recusada."""
         communicator = WebsocketCommunicator(application, "/ws/notifications/")
-        connected, subprotocol = await communicator.connect()
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
+        await communicator.disconnect()
+
+    async def test_authenticated_connection_succeeds(self):
+        """Com um access token válido na query string, a conexão é aceita."""
+        from channels.db import database_sync_to_async
+        from django.contrib.auth import get_user_model
+        from rest_framework_simplejwt.tokens import AccessToken
+
+        User = get_user_model()
+        user = await database_sync_to_async(User.objects.create_user)(
+            username='ws_user', password='password123'
+        )
+        # AccessToken.for_user does not touch the DB (unlike RefreshToken.for_user,
+        # which writes an OutstandingToken and would fail in this async test).
+        token = str(AccessToken.for_user(user))
+
+        communicator = WebsocketCommunicator(
+            application, f"/ws/notifications/?token={token}"
+        )
+        connected, _ = await communicator.connect()
         self.assertTrue(connected)
         await communicator.disconnect()
 

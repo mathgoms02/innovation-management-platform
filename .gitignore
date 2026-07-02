@@ -5,6 +5,7 @@
 venv
 db.sqlite3
 __pycache__/
+backend/staticfiles/
 
 # Frontend
 node_modules

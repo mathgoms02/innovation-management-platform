@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useToast } from '../../components/Toast';
 import { useAuth } from './AuthContext';
+import { usePreferences } from './PreferencesContext';
 
 export interface Notification {
   id: string;
@@ -19,16 +20,30 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { showToast } = useToast();
   const { user } = useAuth();
+  const { notificationsEnabled } = usePreferences();
+
+  // Kept in a ref so toggling the preference doesn't reconnect the socket.
+  const notificationsEnabledRef = useRef(notificationsEnabled);
+  useEffect(() => {
+    notificationsEnabledRef.current = notificationsEnabled;
+  }, [notificationsEnabled]);
 
   const clearNotifications = () => setNotifications([]);
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotifications([]);
       return;
     }
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/notifications/';
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return;
+    }
+
+    const baseWsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/notifications/';
+    const wsUrl = `${baseWsUrl}?token=${encodeURIComponent(token)}`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {
@@ -40,7 +55,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           timestamp: new Date(),
         };
         setNotifications(prev => [newNotification, ...prev]);
-        showToast('info', data.message);
+        if (notificationsEnabledRef.current) {
+          showToast('info', data.message);
+        }
       }
     };
 

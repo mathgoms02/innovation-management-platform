@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { NotificationProvider } from './features/auth/NotificationContext';
+import { PreferencesProvider } from './features/auth/PreferencesContext';
 import { ToastProvider } from './components/Toast';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -27,6 +28,7 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
+        <PreferencesProvider>
         <NotificationProvider>
           <Router>
           <Routes>
@@ -107,6 +109,7 @@ function App() {
           </Routes>
         </Router>
         </NotificationProvider>
+        </PreferencesProvider>
         </ToastProvider>
         </AuthProvider>
 

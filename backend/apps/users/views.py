@@ -3,46 +3,36 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from .serializers import (
+    UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer,
+    PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
+    PasswordChangeSerializer, EmailVerifySerializer,
+)
+from .services import UserService, AvatarValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
-from apps.monitoring.services import log_action
-from ipware import get_client_ip
 
 User = get_user_model()
 
 class AuditLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    throttle_scope = 'login'
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         if response.status_code == 200:
-            username = request.data.get('username')
-            try:
-                user = User.objects.get(username=username)
-                ip, _ = get_client_ip(request)
-                log_action(user, 'LOGIN', user, ip_address=ip)
-            except User.DoesNotExist:
-                pass
+            UserService.audit_login(request.data.get('username'), request)
         return response
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
+    throttle_scope = 'register'
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        
-        # Automatic Login: Generate tokens
-        refresh = RefreshToken.for_user(user)
-        
-        # Auditoria
-        ip, _ = get_client_ip(request)
-        log_action(user, 'CREATE', user, ip_address=ip)
-        log_action(user, 'LOGIN', user, ip_address=ip)
+        user, refresh = UserService.register(serializer, request)
 
         headers = self.get_success_headers(serializer.data)
         return Response({
@@ -83,19 +73,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         return self.request.user
 
     def delete(self, request, *args, **kwargs):
-        user = self.get_object()
-        # LGPD Anonymization
-        user.username = f"deleted_{user.id}"
-        user.email = f"deleted_{user.id}@anonymized.local"
-        user.first_name = "Anônimo"
-        user.last_name = ""
-        user.bio = ""
-        user.is_active = False
-        user.has_accepted_terms = False
-        user.set_unusable_password()
-        if user.avatar:
-            user.avatar.delete(save=False)
-        user.save()
+        UserService.anonymize(self.get_object())
         return Response(status=204)
 
 
@@ -104,50 +82,112 @@ class AvatarUploadView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser)
 
-    ALLOWED_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
-    MAX_SIZE = 5 * 1024 * 1024  # 5 MB
-
     def post(self, request):
-        avatar = request.FILES.get('avatar')
-        if not avatar:
-            return Response(
-                {'detail': 'Nenhum arquivo enviado.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if avatar.content_type not in self.ALLOWED_TYPES:
-            return Response(
-                {'detail': 'Formato não suportado. Use JPEG, PNG, GIF ou WebP.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if avatar.size > self.MAX_SIZE:
-            return Response(
-                {'detail': 'Arquivo excede o limite de 5 MB.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        user = request.user
-        # Remove old avatar file if it exists
-        if user.avatar:
-            user.avatar.delete(save=False)
-
-        user.avatar = avatar
-        user.save(update_fields=['avatar'])
-
-        ip, _ = get_client_ip(request)
-        log_action(user, 'UPDATE', user, ip_address=ip)
-
+        try:
+            user = UserService.set_avatar(request.user, request.FILES.get('avatar'), request)
+        except AvatarValidationError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
-        user = request.user
-        if user.avatar:
-            user.avatar.delete(save=False)
-            user.avatar = None
-            user.save(update_fields=['avatar'])
-
-            ip, _ = get_client_ip(request)
-            log_action(user, 'UPDATE', user, ip_address=ip)
-
+        user = UserService.clear_avatar(request.user, request)
         serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PasswordResetRequestView(APIView):
+    """Request a password-reset e-mail. Always 200 (never reveals existence)."""
+    permission_classes = (permissions.AllowAny,)
+    throttle_scope = 'register'
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        UserService.request_password_reset(serializer.validated_data['email'])
+        return Response(
+            {'detail': 'Se o e-mail existir, um link de redefinição foi enviado.'},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ok = UserService.confirm_password_reset(
+            serializer.validated_data['uid'],
+            serializer.validated_data['token'],
+            serializer.validated_data['new_password'],
+        )
+        if not ok:
+            return Response(
+                {'detail': 'Link inválido ou expirado.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'Senha redefinida com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class PasswordChangeView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        serializer = PasswordChangeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ok = UserService.change_password(
+            request.user,
+            serializer.validated_data['old_password'],
+            serializer.validated_data['new_password'],
+        )
+        if not ok:
+            return Response(
+                {'detail': 'Senha atual incorreta.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'Senha alterada com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class EmailVerifyView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        serializer = EmailVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = UserService.verify_email(
+            serializer.validated_data['uid'],
+            serializer.validated_data['token'],
+        )
+        if not user:
+            return Response(
+                {'detail': 'Link de verificação inválido ou expirado.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'E-mail verificado com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class EmailVerifyResendView(APIView):
+    """Re-send the verification e-mail to the authenticated user."""
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        sent = UserService.resend_verification(request.user)
+        if not sent:
+            return Response(
+                {'detail': 'E-mail já verificado ou ausente.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'E-mail de verificação reenviado.'}, status=status.HTTP_200_OK)
+
+
+class LogoutAllView(APIView):
+    """Blacklist all of the authenticated user's refresh tokens (sign out everywhere)."""
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        count = UserService.logout_all(request.user)
+        return Response(
+            {'detail': f'{count} sessão(ões) encerrada(s).'},
+            status=status.HTTP_200_OK,
+        )
