@@ -11,7 +11,7 @@ from apps.hackathons.permissions import IsAdminOrOrganizerOrReadOnly
 from apps.hackathons.models import Hackathon
 from apps.submissions.models import Submission
 from apps.monitoring.mixins import AuditMixin
-from apps.monitoring.services import log_action, send_global_notification
+from apps.monitoring.services import log_action, send_user_notification
 from ipware import get_client_ip
 
 class CriterionViewSet(AuditMixin, viewsets.ModelViewSet):
@@ -64,8 +64,13 @@ class EvaluationViewSet(AuditMixin, viewsets.ModelViewSet):
                 ip_address=ip
             )
             
-            # Notificação em tempo real
-            send_global_notification(f"Nova avaliação submetida para o time {evaluation.submission.team.name}!")
+            # Notificação em tempo real: direcionada ao organizador do hackathon.
+            organizer = evaluation.submission.team.hackathon.organizer
+            if organizer_id := getattr(organizer, 'id', None):
+                send_user_notification(
+                    organizer_id,
+                    f"Nova avaliação submetida para o time {evaluation.submission.team.name}!",
+                )
             
             return Response(
                 EvaluationSerializer(evaluation).data, 

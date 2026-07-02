@@ -23,26 +23,38 @@ def log_action(user, action, resource, changes=None, ip_address=None):
         ip_address=ip_address
     )
 
-def send_global_notification(message):
-    """
-    Sends a notification to all connected users via WebSocket.
-    Resilient to channel layer errors (e.g. Redis down).
+def _dispatch(group, message):
+    """Send a notification to a channel-layer group.
+
+    Resilient to channel layer errors (e.g. Redis down): logs and never crashes
+    the calling request.
     """
     try:
         channel_layer = get_channel_layer()
         if channel_layer:
             async_to_sync(channel_layer.group_send)(
-                "notifications",
+                group,
                 {
                     "type": "send_notification",
-                    "message": message
+                    "message": message,
                 }
             )
     except Exception as e:
-        # Log error but don't crash the request
         import logging
         logger = logging.getLogger(__name__)
-        logger.error(f"Failed to send global notification: {e}")
+        logger.error(f"Failed to send notification to {group}: {e}")
+
+
+def send_global_notification(message):
+    """Broadcast a notification to every connected authenticated user."""
+    from .consumers import BROADCAST_GROUP
+    _dispatch(BROADCAST_GROUP, message)
+
+
+def send_user_notification(user_id, message):
+    """Send a notification to a single user's group (`notifications_{user_id}`)."""
+    from .consumers import user_group_name
+    _dispatch(user_group_name(user_id), message)
 
 def get_user_stats(user):
     """

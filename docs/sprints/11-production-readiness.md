@@ -18,11 +18,11 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 ## Gaps Críticos Identificados
 | # | Gap | Severidade |
 |---|-----|-----------|
-| 1 | WebSocket sem autenticação (`accept()` sem checar usuário; grupo global único) | 🔴 Crítico |
+| 1 | ~~WebSocket sem autenticação (`accept()` sem checar usuário; grupo global único)~~ | ✅ Resolvido |
 | 2 | ~~Sem `MEDIA_URL`/`MEDIA_ROOT` apesar de `ImageField` (avatar)~~ | ✅ Resolvido |
-| 3 | SQLite em uso; incompatível com múltiplos workers + Channels/Redis | 🔴 Crítico |
-| 4 | Sem headers de segurança (SSL redirect, HSTS, cookies secure) | 🔴 Crítico |
-| 5 | Sem throttling em login/registro (brute-force) | 🟠 Alto |
+| 3 | ~~SQLite fixo~~ → banco via `DATABASE_URL` (env). Falta subir Postgres gerenciado (Fase D) | 🟢 Parcial |
+| 4 | ~~Sem headers de segurança (SSL redirect, HSTS, cookies secure)~~ | ✅ Resolvido |
+| 5 | ~~Sem throttling em login/registro (brute-force)~~ | ✅ Resolvido |
 | 6 | Sem Docker, CI/CD, `.env.example`, servidor ASGI de produção, estáticos | 🟠 Alto |
 | 7 | Service Layer ausente em `users` e `hackathons` (viola padrão obrigatório) | 🟡 Médio |
 | 8 | Zero testes no frontend; sem reset de senha / verificação de e-mail | 🟡 Médio |
@@ -32,11 +32,11 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 ## Tarefas
 
 ### Fase A — Hardening de Segurança (bloqueante)
-- [x] **Autenticar WebSocket via JWT** — middleware de Channels que valida o token (query string `?token=`), popula `scope["user"]` e rejeita conexão anônima.
-- [x] **Headers de segurança condicionais a `DEBUG`** — `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_PROXY_SSL_HEADER`.
-- [ ] **Throttling DRF** (`ScopedRateThrottle`) em login e registro.
+- [x] **Autenticar WebSocket via JWT** — `apps/monitoring/middleware.py::JWTAuthMiddleware` valida o access token da query string (`?token=`), popula `scope["user"]` via SimpleJWT; `NotificationConsumer` recusa conexões anônimas (`close(code=4001)`). `core/asgi.py` usa o middleware no lugar de `AuthMiddlewareStack`. Frontend passa o token na URL do WS. Coberto por testes (`WebSocketTests`).
+- [x] **Headers de segurança condicionais a `DEBUG`** — `SECURE_SSL_REDIRECT`, `SECURE_PROXY_SSL_HEADER`, `SECURE_HSTS_SECONDS`/`INCLUDE_SUBDOMAINS`/`PRELOAD`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_CONTENT_TYPE_NOSNIFF`, `CSRF_TRUSTED_ORIGINS` — aplicados apenas quando `DEBUG=False`.
+- [x] **Throttling DRF** (`ScopedRateThrottle`) em login (`login`, 10/min) e registro (`register`, 5/min), configurável por env; desativado sob o test runner.
 - [x] **Validação de upload** (tipo/tamanho/extensão) para avatar — endpoint dedicado `POST/DELETE /api/users/me/avatar/` com validação de MIME type (JPEG, PNG, GIF, WebP) e tamanho (5 MB). Frontend exibe avatar real na Settings e topbar, com upload, preview e remoção.
-- [ ] **Notificações por usuário** — migrar do grupo global único para grupos `notifications_{user_id}`.
+- [x] **Notificações por usuário** — `NotificationConsumer` entra nos grupos `notifications_{user_id}` (por usuário) e `notifications_broadcast` (global). `services.send_user_notification(user_id, msg)` mira um usuário; `send_global_notification(msg)` faz broadcast. Notificação de nova avaliação passou a mirar o organizador do hackathon.
 
 ### Fase B — Lacunas Funcionais do Produto
 - [x] Configurar MEDIA — `MEDIA_URL = '/media/'` e `MEDIA_ROOT = BASE_DIR / 'media'` adicionados ao `settings.py`; `core/urls.py` serve arquivos de media em `DEBUG`. `UserSerializer` retorna URL absoluta via `SerializerMethodField`. Para produção, migrar para object storage / `django-storages`.

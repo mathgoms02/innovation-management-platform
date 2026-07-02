@@ -28,7 +28,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return;
     }
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/notifications/';
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return;
+    }
+
+    const baseWsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/notifications/';
+    const wsUrl = `${baseWsUrl}?token=${encodeURIComponent(token)}`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {
