@@ -1,7 +1,43 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 User = get_user_model()
+
+
+def _run_password_validators(value):
+    try:
+        validate_password(value)
+    except DjangoValidationError as exc:
+        raise serializers.ValidationError(list(exc.messages))
+    return value
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_new_password(self, value):
+        return _run_password_validators(value)
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_new_password(self, value):
+        return _run_password_validators(value)
+
+
+class EmailVerifySerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -16,8 +52,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'role', 'bio', 'avatar', 'has_accepted_terms')
-        read_only_fields = ('id', 'has_accepted_terms')
+        fields = ('id', 'username', 'email', 'role', 'bio', 'avatar', 'has_accepted_terms', 'is_email_verified')
+        read_only_fields = ('id', 'has_accepted_terms', 'is_email_verified')
 
     def get_avatar(self, obj):
         if obj.avatar:

@@ -40,7 +40,7 @@ Levar a plataforma do estado "funcional em dev" para "implantável em produção
 
 ### Fase B — Lacunas Funcionais do Produto
 - [x] Configurar MEDIA — `MEDIA_URL = '/media/'` e `MEDIA_ROOT = BASE_DIR / 'media'` adicionados ao `settings.py`; `core/urls.py` serve arquivos de media em `DEBUG`. `UserSerializer` retorna URL absoluta via `SerializerMethodField`. Para produção, migrar para object storage / `django-storages`.
-- [ ] Reset e troca de senha + verificação de e-mail (`EMAIL_BACKEND` via env).
+- [x] Reset e troca de senha + verificação de e-mail — `EMAIL_BACKEND`/SMTP via env (console por padrão). Endpoints: `POST /api/users/password/reset/`, `password/reset/confirm/`, `password/change/`, `verify-email/`. Campo `User.is_email_verified` + `EmailVerificationTokenGenerator`; reset não revela existência de conta. Coberto por testes (`PasswordFlowTests`, `EmailVerificationTests`).
 - [ ] Fechar escopo da Sprint 10 (dinâmica de equipes / descoberta).
 
 ### Fase C — Arquitetura & Qualidade

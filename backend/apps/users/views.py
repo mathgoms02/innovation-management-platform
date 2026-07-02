@@ -3,7 +3,11 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from .serializers import (
+    UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer,
+    PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
+    PasswordChangeSerializer, EmailVerifySerializer,
+)
 from .services import UserService, AvatarValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -90,3 +94,74 @@ class AvatarUploadView(APIView):
         user = UserService.clear_avatar(request.user, request)
         serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PasswordResetRequestView(APIView):
+    """Request a password-reset e-mail. Always 200 (never reveals existence)."""
+    permission_classes = (permissions.AllowAny,)
+    throttle_scope = 'register'
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        UserService.request_password_reset(serializer.validated_data['email'])
+        return Response(
+            {'detail': 'Se o e-mail existir, um link de redefinição foi enviado.'},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ok = UserService.confirm_password_reset(
+            serializer.validated_data['uid'],
+            serializer.validated_data['token'],
+            serializer.validated_data['new_password'],
+        )
+        if not ok:
+            return Response(
+                {'detail': 'Link inválido ou expirado.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'Senha redefinida com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class PasswordChangeView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        serializer = PasswordChangeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ok = UserService.change_password(
+            request.user,
+            serializer.validated_data['old_password'],
+            serializer.validated_data['new_password'],
+        )
+        if not ok:
+            return Response(
+                {'detail': 'Senha atual incorreta.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'Senha alterada com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class EmailVerifyView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        serializer = EmailVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = UserService.verify_email(
+            serializer.validated_data['uid'],
+            serializer.validated_data['token'],
+        )
+        if not user:
+            return Response(
+                {'detail': 'Link de verificação inválido ou expirado.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'E-mail verificado com sucesso.'}, status=status.HTTP_200_OK)
