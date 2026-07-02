@@ -25,13 +25,15 @@ class WebSocketTests(unittest.IsolatedAsyncioTestCase):
         """Com um access token válido na query string, a conexão é aceita."""
         from channels.db import database_sync_to_async
         from django.contrib.auth import get_user_model
-        from rest_framework_simplejwt.tokens import RefreshToken
+        from rest_framework_simplejwt.tokens import AccessToken
 
         User = get_user_model()
         user = await database_sync_to_async(User.objects.create_user)(
             username='ws_user', password='password123'
         )
-        token = str(RefreshToken.for_user(user).access_token)
+        # AccessToken.for_user does not touch the DB (unlike RefreshToken.for_user,
+        # which writes an OutstandingToken and would fail in this async test).
+        token = str(AccessToken.for_user(user))
 
         communicator = WebsocketCommunicator(
             application, f"/ws/notifications/?token={token}"

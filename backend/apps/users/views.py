@@ -165,3 +165,29 @@ class EmailVerifyView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response({'detail': 'E-mail verificado com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class EmailVerifyResendView(APIView):
+    """Re-send the verification e-mail to the authenticated user."""
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        sent = UserService.resend_verification(request.user)
+        if not sent:
+            return Response(
+                {'detail': 'E-mail já verificado ou ausente.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'detail': 'E-mail de verificação reenviado.'}, status=status.HTTP_200_OK)
+
+
+class LogoutAllView(APIView):
+    """Blacklist all of the authenticated user's refresh tokens (sign out everywhere)."""
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        count = UserService.logout_all(request.user)
+        return Response(
+            {'detail': f'{count} sessão(ões) encerrada(s).'},
+            status=status.HTTP_200_OK,
+        )

@@ -139,7 +139,65 @@ class PasswordFlowTests(APITestCase):
         self.assertTrue(user.check_password('newpassword456'))
 
 
+class PreferencesTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='prefuser', password='pw')
+        self.client.force_authenticate(user=self.user)
+
+    def test_defaults_present_on_new_user(self):
+        self.assertEqual(self.user.preferences['accent'], 'cyan')
+        self.assertEqual(self.user.preferences['language'], 'pt-BR')
+
+    def test_partial_update_merges_preferences(self):
+        response = self.client.patch(reverse('user_detail'), {
+            'preferences': {'accent': 'magenta', 'reduce_motion': True},
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.preferences['accent'], 'magenta')
+        self.assertTrue(self.user.preferences['reduce_motion'])
+        # untouched default is preserved by the merge
+        self.assertEqual(self.user.preferences['language'], 'pt-BR')
+
+    def test_invalid_accent_is_rejected(self):
+        response = self.client.patch(reverse('user_detail'), {
+            'preferences': {'accent': 'not-a-color'},
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutAllTests(APITestCase):
+    def test_logout_all_blacklists_outstanding_tokens(self):
+        from rest_framework_simplejwt.tokens import RefreshToken
+        from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+
+        user = User.objects.create_user(username='sessions', password='pw')
+        RefreshToken.for_user(user)
+        RefreshToken.for_user(user)
+
+        self.client.force_authenticate(user=user)
+        response = self.client.post(reverse('logout_all'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(BlacklistedToken.objects.count(), 2)
+
+
 class EmailVerificationTests(APITestCase):
+    def test_resend_verification_for_unverified_user(self):
+        user = User.objects.create_user(
+            username='needsverify', password='pw', email='nv@example.com'
+        )
+        self.client.force_authenticate(user=user)
+        response = self.client.post(reverse('verify_email_resend'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_resend_verification_rejected_when_already_verified(self):
+        user = User.objects.create_user(username='already', password='pw', email='a@example.com')
+        user.is_email_verified = True
+        user.save(update_fields=['is_email_verified'])
+        self.client.force_authenticate(user=user)
+        response = self.client.post(reverse('verify_email_resend'))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_verify_email_marks_user_verified(self):
         user = User.objects.create_user(
             username='verifyme', password='pw', email='verify@example.com'

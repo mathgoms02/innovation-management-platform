@@ -118,6 +118,31 @@ class UserService:
         return True
 
     @staticmethod
+    def resend_verification(user):
+        """Re-send the verification e-mail. Returns False if already verified."""
+        if user.is_email_verified or not user.email:
+            return False
+        UserService.send_verification_email(user)
+        return True
+
+    @staticmethod
+    def logout_all(user):
+        """Blacklist every outstanding refresh token for the user.
+
+        Invalidates all sessions (access tokens expire on their own). Returns the
+        number of tokens blacklisted.
+        """
+        from rest_framework_simplejwt.token_blacklist.models import (
+            BlacklistedToken, OutstandingToken,
+        )
+        count = 0
+        for token in OutstandingToken.objects.filter(user=user):
+            _, created = BlacklistedToken.objects.get_or_create(token=token)
+            if created:
+                count += 1
+        return count
+
+    @staticmethod
     def audit_login(username, request):
         """Record a successful login in the audit trail."""
         try:

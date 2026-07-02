@@ -50,9 +50,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
 
+    # Allowed preference keys and their accepted values (None = any bool).
+    PREF_ACCENTS = {'cyan', 'magenta', 'lime', 'violet'}
+    PREF_LANGUAGES = {'pt-BR', 'en'}
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'role', 'bio', 'avatar', 'has_accepted_terms', 'is_email_verified')
+        fields = ('id', 'username', 'email', 'role', 'bio', 'avatar', 'has_accepted_terms', 'is_email_verified', 'preferences')
         read_only_fields = ('id', 'has_accepted_terms', 'is_email_verified')
 
     def get_avatar(self, obj):
@@ -62,6 +66,34 @@ class UserSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
         return None
+
+    def validate_preferences(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError('preferences deve ser um objeto.')
+
+        cleaned = {}
+        for key in ('reduce_motion', 'notifications', 'plain_text'):
+            if key in value:
+                if not isinstance(value[key], bool):
+                    raise serializers.ValidationError(f'{key} deve ser booleano.')
+                cleaned[key] = value[key]
+        if 'accent' in value:
+            if value['accent'] not in self.PREF_ACCENTS:
+                raise serializers.ValidationError(f"accent deve ser um de {sorted(self.PREF_ACCENTS)}.")
+            cleaned['accent'] = value['accent']
+        if 'language' in value:
+            if value['language'] not in self.PREF_LANGUAGES:
+                raise serializers.ValidationError(f"language deve ser um de {sorted(self.PREF_LANGUAGES)}.")
+            cleaned['language'] = value['language']
+        return cleaned
+
+    def update(self, instance, validated_data):
+        # Merge preferences instead of replacing, so partial updates work.
+        prefs = validated_data.pop('preferences', None)
+        if prefs is not None:
+            merged = {**(instance.preferences or {}), **prefs}
+            instance.preferences = merged
+        return super().update(instance, validated_data)
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
