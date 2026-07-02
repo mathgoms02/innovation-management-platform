@@ -89,7 +89,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] cyber-grid flex overflow-hidden">
+    <div className="h-screen bg-[var(--color-bg)] cyber-grid flex overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-[var(--color-bg-secondary)]/80 backdrop-blur-sm border-r border-white/5 flex flex-col shrink-0">
         <Link to="/" className="p-8 mb-4 block">
@@ -123,7 +123,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Main */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="h-20 bg-[var(--color-bg-secondary)]/80 backdrop-blur-sm border-b border-white/5 flex items-center justify-between px-8 lg:px-12 shrink-0">
+        <header className="relative z-30 h-20 bg-[var(--color-bg-secondary)]/80 backdrop-blur-sm border-b border-white/5 flex items-center justify-between px-8 lg:px-12 shrink-0">
           <div className="relative w-96 max-w-[40vw]">
             <div className="flex items-center gap-4 bg-[var(--color-bg)]/50 px-4 py-2 rounded-lg border border-white/5 focus-within:border-[var(--color-primary)]/40 transition-colors">
               <Search size={16} className="text-[var(--text-light)]" />
@@ -275,7 +275,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         </header>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">{children}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">{children}</div>
       </main>
     </div>
   );

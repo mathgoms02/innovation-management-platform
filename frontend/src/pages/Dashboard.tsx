@@ -4,7 +4,7 @@ import { useNotifications } from '../features/auth/NotificationContext';
 import { monitoringService } from '../services/monitoring';
 import type { AuditLog, Announcement, DashboardStats, ChartEntry } from '../services/monitoring';
 import AppLayout from '../components/AppLayout';
-import { LayoutDashboard, Activity, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Activity, Newspaper, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const Dashboard: React.FC = () => {
@@ -42,6 +42,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // The backend pads the chart with zero-value placeholders; only render the
+  // graph when there is at least one real (non-zero) metric.
+  const hasChartData = chartData.some((entry) => entry.value > 0);
 
   // Refresh on incoming realtime notifications
   useEffect(() => {
@@ -119,24 +123,36 @@ const Dashboard: React.FC = () => {
                 </p>
               )}
 
-              <div className="mt-12 h-64 card p-6 border-white/5 bg-white/[0.01]">
+              <div className="mt-12 h-64 card p-6 border-white/5 bg-white/[0.01] flex flex-col">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-light)] mb-6">Performance_Metrics</p>
-                <ResponsiveContainer width="100%" height="80%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px' }}
-                      itemStyle={{ color: 'var(--color-primary)' }}
-                    />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                {hasChartData ? (
+                  <ResponsiveContainer width="100%" height="80%">
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis hide />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px' }}
+                        itemStyle={{ color: 'var(--color-primary)' }}
+                      />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center gap-3 border border-dashed border-white/10 rounded-xl">
+                    <BarChart3 size={32} className="text-white/10" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20 italic">
+                      No_metrics_to_render_yet
+                    </p>
+                    <p className="text-[8px] uppercase tracking-[0.2em] text-white/15">
+                      Participe de uma equipe e receba avaliações
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
 
