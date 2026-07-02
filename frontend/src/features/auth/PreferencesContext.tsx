@@ -42,6 +42,7 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Reset the optimistic mirror whenever the authenticated user changes.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocal(null);
   }, [user?.id]);
 

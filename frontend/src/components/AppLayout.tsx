@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { useNotifications } from '../features/auth/NotificationContext';
+import { usePreferences } from '../features/auth/PreferencesContext';
 import { getHackathons, type Hackathon } from '../services/hackathon';
 import {
   LayoutDashboard,
@@ -31,25 +32,28 @@ const NAV_ITEMS: NavItem[] = [
   { icon: SlidersHorizontal, label: 'Gerenciar', to: '/manage', roles: ['ADMIN', 'ORGANIZER'] },
 ];
 
-const SidebarItem = ({ icon: Icon, label, to, active }: NavItem & { active: boolean }) => (
-  <Link
-    to={to}
-    className={`relative flex items-center gap-4 px-6 py-4 transition-all duration-300 group ${
-      active
-        ? 'text-[var(--color-primary)]'
-        : 'text-[var(--text-light)] hover:bg-white/5 hover:text-white'
-    }`}
-  >
-    {active && (
-      <span className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-[var(--color-primary)] shadow-[0_0_12px_var(--color-primary)]" />
-    )}
-    <Icon
-      size={20}
-      className={active ? 'text-[var(--color-primary)] drop-shadow-[0_0_6px_var(--color-primary)]' : 'group-hover:text-[var(--color-primary)]'}
-    />
-    <span className="text-xs font-black uppercase tracking-[0.2em]">{label}</span>
-  </Link>
-);
+const SidebarItem = ({ icon: Icon, label, to, active }: NavItem & { active: boolean }) => {
+  const { fmt } = usePreferences();
+  return (
+    <Link
+      to={to}
+      className={`relative flex items-center gap-4 px-6 py-4 transition-all duration-300 group ${
+        active
+          ? 'text-[var(--color-primary)]'
+          : 'text-[var(--text-light)] hover:bg-white/5 hover:text-white'
+      }`}
+    >
+      {active && (
+        <span className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-[var(--color-primary)] shadow-[0_0_12px_var(--color-primary)]" />
+      )}
+      <Icon
+        size={20}
+        className={active ? 'text-[var(--color-primary)] drop-shadow-[0_0_6px_var(--color-primary)]' : 'group-hover:text-[var(--color-primary)]'}
+      />
+      <span className="text-xs font-black uppercase tracking-[0.2em]">{fmt(label)}</span>
+    </Link>
+  );
+};
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -58,6 +62,7 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const { notifications, clearNotifications } = useNotifications();
+  const { fmt } = usePreferences();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -106,7 +111,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <SidebarItem key={item.to} {...item} active={isActive(item.to)} />
           ))}
           <div className="mt-8 mb-2 px-6 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
-            Preferences
+            {fmt('Preferences')}
           </div>
           <SidebarItem icon={SettingsIcon} label="Settings" to="/settings" active={isActive('/settings')} />
         </nav>
@@ -116,7 +121,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           className="flex items-center gap-4 px-6 py-8 text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/5 transition-all"
         >
           <LogOut size={20} />
-          <span className="text-xs font-black uppercase tracking-[0.2em]">Terminate_Session</span>
+          <span className="text-xs font-black uppercase tracking-[0.2em]">{fmt('Terminate_Session')}</span>
         </button>
       </aside>
 
@@ -182,7 +187,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <div className="absolute right-0 mt-4 w-80 bg-[var(--color-bg-secondary)] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
                   <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                     <span className="text-[10px] font-black uppercase tracking-widest text-white italic">
-                      Protocol_Stream
+                      {fmt('Protocol_Stream')}
                     </span>
                     <button
                       onClick={(e) => {
