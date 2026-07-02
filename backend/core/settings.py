@@ -227,6 +227,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 import structlog
 
+# The logs directory is gitignored, so it may be absent on a fresh checkout
+# (CI, Docker, new clone). Create it before the file handler opens json.log.
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
@@ -259,7 +264,7 @@ LOGGING = {
         },
         "json_file": {
             "class": "logging.handlers.WatchedFileHandler",
-            "filename": BASE_DIR / "logs/json.log",
+            "filename": LOGS_DIR / "json.log",
             "formatter": "json_formatter",
         },
     },
