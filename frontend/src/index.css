@@ -94,6 +94,20 @@
     animation: slide-up 0.3s ease-out both;
   }
 
+  /* Preference: reduce motion — neutralizes entrance animations and long
+     transitions across the app (toggled from Settings > Preferences). */
+  .reduce-motion .animation-fade-in,
+  .reduce-motion .animation-slide-up,
+  .reduce-motion .gradient-border {
+    animation: none !important;
+  }
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    transition-duration: 0.001s !important;
+    animation-duration: 0.001s !important;
+  }
+
   /* Scrollbar fina e temática */
   .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

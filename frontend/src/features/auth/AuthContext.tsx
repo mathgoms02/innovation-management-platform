@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../../services/api';
+import type { UserPreferences } from '../../services/user';
 
 export interface User {
   id: number;
@@ -8,6 +9,8 @@ export interface User {
   role: string;
   bio?: string;
   avatar?: string;
+  is_email_verified?: boolean;
+  preferences?: UserPreferences;
 }
 
 interface AuthContextType {

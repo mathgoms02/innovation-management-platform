@@ -13,6 +13,10 @@ vi.mock('./AuthContext', () => ({
   useAuth: () => ({ user: currentUser }),
 }));
 
+vi.mock('./PreferencesContext', () => ({
+  usePreferences: () => ({ notificationsEnabled: true }),
+}));
+
 // Minimal fake WebSocket that lets tests push messages in.
 class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
